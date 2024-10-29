@@ -13,7 +13,12 @@
 		EE1FE5F82CCAC2FF00D30110 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = EE1FE5F72CCAC2FF00D30110 /* Base */; };
 		EE1FE5FD2CCAC30000D30110 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = EE1FE5FC2CCAC30000D30110 /* Base */; };
 		EEC039942CCC1ED5003E0589 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EEC039932CCC1ED5003E0589 /* Assets.xcassets */; };
-		EEC5E9E32CCAC4FA0040237B /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = EEC5E9E22CCAC4FA0040237B /* Models.scnassets */; };
+		EEC039962CCC253A003E0589 /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = EEC039952CCC253A003E0589 /* Models.scnassets */; };
+		EEC039982CCC3DE6003E0589 /* VirtualObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC039972CCC3DE6003E0589 /* VirtualObject.swift */; };
+		EEC0399B2CCCE0FD003E0589 /* ModelsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC0399A2CCCE0FD003E0589 /* ModelsMenuView.swift */; };
+		EEC0399D2CCCE103003E0589 /* ModelsMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC0399C2CCCE103003E0589 /* ModelsMenuController.swift */; };
+		EEC039A02CCCE148003E0589 /* ModelsMenuItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC0399F2CCCE148003E0589 /* ModelsMenuItemCell.swift */; };
+		EEC039A22CCCE7E6003E0589 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC039A12CCCE7E6003E0589 /* ViewExtensions.swift */; };
 		EEC5E9E72CCAC6D80040237B /* BaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9E62CCAC6D80040237B /* BaseView.swift */; };
 		EEC5E9E92CCAC6F00040237B /* BaseController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9E82CCAC6F00040237B /* BaseController.swift */; };
 		EEC5E9EE2CCAC78C0040237B /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9ED2CCAC78C0040237B /* MainView.swift */; };
@@ -33,7 +38,12 @@
 		EE1FE5FC2CCAC30000D30110 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		EE1FE5FE2CCAC30000D30110 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EEC039932CCC1ED5003E0589 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		EEC5E9E22CCAC4FA0040237B /* Models.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = Models.scnassets; sourceTree = "<group>"; };
+		EEC039952CCC253A003E0589 /* Models.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = Models.scnassets; sourceTree = "<group>"; };
+		EEC039972CCC3DE6003E0589 /* VirtualObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObject.swift; sourceTree = "<group>"; };
+		EEC0399A2CCCE0FD003E0589 /* ModelsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsMenuView.swift; sourceTree = "<group>"; };
+		EEC0399C2CCCE103003E0589 /* ModelsMenuController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsMenuController.swift; sourceTree = "<group>"; };
+		EEC0399F2CCCE148003E0589 /* ModelsMenuItemCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsMenuItemCell.swift; sourceTree = "<group>"; };
+		EEC039A12CCCE7E6003E0589 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		EEC5E9E62CCAC6D80040237B /* BaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseView.swift; sourceTree = "<group>"; };
 		EEC5E9E82CCAC6F00040237B /* BaseController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseController.swift; sourceTree = "<group>"; };
 		EEC5E9ED2CCAC78C0040237B /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -103,13 +113,31 @@
 			path = PlaceIt;
 			sourceTree = "<group>";
 		};
+		EEC039992CCCE0F4003E0589 /* ModelsMenu */ = {
+			isa = PBXGroup;
+			children = (
+				EEC0399E2CCCE13A003E0589 /* Cells */,
+				EEC0399A2CCCE0FD003E0589 /* ModelsMenuView.swift */,
+				EEC0399C2CCCE103003E0589 /* ModelsMenuController.swift */,
+			);
+			path = ModelsMenu;
+			sourceTree = "<group>";
+		};
+		EEC0399E2CCCE13A003E0589 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				EEC0399F2CCCE148003E0589 /* ModelsMenuItemCell.swift */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
 		EEC5E9DF2CCAC4A40040237B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				EEC039932CCC1ED5003E0589 /* Assets.xcassets */,
-				EEC5E9E22CCAC4FA0040237B /* Models.scnassets */,
 				EE1FE5FB2CCAC30000D30110 /* LaunchScreen.storyboard */,
 				EE1FE5F62CCAC2FF00D30110 /* Main.storyboard */,
+				EEC039952CCC253A003E0589 /* Models.scnassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -118,6 +146,7 @@
 			isa = PBXGroup;
 			children = (
 				EEC5E9F42CCAD8270040237B /* ARKitExtensions.swift */,
+				EEC039A12CCCE7E6003E0589 /* ViewExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -125,6 +154,7 @@
 		EEC5E9E12CCAC4C20040237B /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				EEC039992CCCE0F4003E0589 /* ModelsMenu */,
 				EEC5E9EC2CCAC7800040237B /* Main */,
 				EEC5E9E62CCAC6D80040237B /* BaseView.swift */,
 				EEC5E9E82CCAC6F00040237B /* BaseController.swift */,
@@ -145,6 +175,7 @@
 			isa = PBXGroup;
 			children = (
 				EEC5E9F22CCACF1D0040237B /* Plane.swift */,
+				EEC039972CCC3DE6003E0589 /* VirtualObject.swift */,
 			);
 			path = "Virtual Objects";
 			sourceTree = "<group>";
@@ -209,8 +240,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EEC5E9E32CCAC4FA0040237B /* Models.scnassets in Resources */,
 				EE1FE5FD2CCAC30000D30110 /* Base in Resources */,
+				EEC039962CCC253A003E0589 /* Models.scnassets in Resources */,
 				EEC039942CCC1ED5003E0589 /* Assets.xcassets in Resources */,
 				EE1FE5F82CCAC2FF00D30110 /* Base in Resources */,
 			);
@@ -268,8 +299,13 @@
 				EEC5E9F02CCAC7930040237B /* MainController.swift in Sources */,
 				EEC5E9EE2CCAC78C0040237B /* MainView.swift in Sources */,
 				EE1FE5F12CCAC2FF00D30110 /* AppDelegate.swift in Sources */,
+				EEC039A02CCCE148003E0589 /* ModelsMenuItemCell.swift in Sources */,
+				EEC0399B2CCCE0FD003E0589 /* ModelsMenuView.swift in Sources */,
 				EEC5E9F52CCAD8270040237B /* ARKitExtensions.swift in Sources */,
 				EEC5E9E92CCAC6F00040237B /* BaseController.swift in Sources */,
+				EEC039A22CCCE7E6003E0589 /* ViewExtensions.swift in Sources */,
+				EEC0399D2CCCE103003E0589 /* ModelsMenuController.swift in Sources */,
+				EEC039982CCC3DE6003E0589 /* VirtualObject.swift in Sources */,
 				EE1FE5F32CCAC2FF00D30110 /* SceneDelegate.swift in Sources */,
 				EEC5E9E72CCAC6D80040237B /* BaseView.swift in Sources */,
 				EEC5E9F32CCACF1D0040237B /* Plane.swift in Sources */,

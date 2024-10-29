@@ -20,14 +20,14 @@ class Plane: SCNNode {
         self.planeGeometry = SCNPlane(width: CGFloat(anchor.planeExtent.width), height: CGFloat(anchor.planeExtent.height))
         
         // TODO: Unable to load tron_grid. Glitches and dissapears from the scene.
-//        let material = SCNMaterial()
-//        if let img = UIImage(named: "tron_grid") {
-//            material.diffuse.contents = img
-//        }
-//        self.planeGeometry?.materials = [material]
+        let material = SCNMaterial()
+        if let img = UIImage(named: "tron_grid") {
+            material.diffuse.contents = img
+        }
+        self.planeGeometry?.materials = [material]
         
         
-        self.planeGeometry?.materials.first?.diffuse.contents = UIColor.white.withAlphaComponent(0.8)
+//        self.planeGeometry?.materials.first?.diffuse.contents = UIColor.white.withAlphaComponent(0.8)
         
         let planeNode = SCNNode(geometry: self.planeGeometry)
         planeNode.position = SCNVector3(anchor.center.x, 0, anchor.center.z)
