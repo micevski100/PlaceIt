@@ -12,19 +12,22 @@
 		EE1FE5F32CCAC2FF00D30110 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */; };
 		EE1FE5F82CCAC2FF00D30110 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = EE1FE5F72CCAC2FF00D30110 /* Base */; };
 		EE1FE5FD2CCAC30000D30110 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = EE1FE5FC2CCAC30000D30110 /* Base */; };
+		EE3538E72CD6407100EBBF62 /* ThresholdPanGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3538E62CD6407100EBBF62 /* ThresholdPanGesture.swift */; };
+		EE3538E92CD6455300EBBF62 /* VirtualObjectInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3538E82CD6455300EBBF62 /* VirtualObjectInteraction.swift */; };
+		EE8F9D702CD4104C00CB0C2B /* RenderOutlineShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = EE8F9D6D2CD4104C00CB0C2B /* RenderOutlineShaders.metal */; };
+		EE8F9D712CD4104C00CB0C2B /* RenderOutlineTechnique.plist in Resources */ = {isa = PBXBuildFile; fileRef = EE8F9D6E2CD4104C00CB0C2B /* RenderOutlineTechnique.plist */; };
 		EEC039942CCC1ED5003E0589 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EEC039932CCC1ED5003E0589 /* Assets.xcassets */; };
 		EEC039962CCC253A003E0589 /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = EEC039952CCC253A003E0589 /* Models.scnassets */; };
 		EEC039982CCC3DE6003E0589 /* VirtualObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC039972CCC3DE6003E0589 /* VirtualObject.swift */; };
 		EEC0399B2CCCE0FD003E0589 /* ModelsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC0399A2CCCE0FD003E0589 /* ModelsMenuView.swift */; };
 		EEC0399D2CCCE103003E0589 /* ModelsMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC0399C2CCCE103003E0589 /* ModelsMenuController.swift */; };
 		EEC039A02CCCE148003E0589 /* ModelsMenuItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC0399F2CCCE148003E0589 /* ModelsMenuItemCell.swift */; };
-		EEC039A22CCCE7E6003E0589 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC039A12CCCE7E6003E0589 /* ViewExtensions.swift */; };
 		EEC5E9E72CCAC6D80040237B /* BaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9E62CCAC6D80040237B /* BaseView.swift */; };
 		EEC5E9E92CCAC6F00040237B /* BaseController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9E82CCAC6F00040237B /* BaseController.swift */; };
 		EEC5E9EE2CCAC78C0040237B /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9ED2CCAC78C0040237B /* MainView.swift */; };
 		EEC5E9F02CCAC7930040237B /* MainController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9EF2CCAC7930040237B /* MainController.swift */; };
 		EEC5E9F32CCACF1D0040237B /* Plane.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9F22CCACF1D0040237B /* Plane.swift */; };
-		EEC5E9F52CCAD8270040237B /* ARKitExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9F42CCAD8270040237B /* ARKitExtensions.swift */; };
+		EEC5E9F52CCAD8270040237B /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9F42CCAD8270040237B /* Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,19 +40,22 @@
 		EE1FE5F72CCAC2FF00D30110 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		EE1FE5FC2CCAC30000D30110 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		EE1FE5FE2CCAC30000D30110 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EE3538E62CD6407100EBBF62 /* ThresholdPanGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThresholdPanGesture.swift; sourceTree = "<group>"; };
+		EE3538E82CD6455300EBBF62 /* VirtualObjectInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObjectInteraction.swift; sourceTree = "<group>"; };
+		EE8F9D6D2CD4104C00CB0C2B /* RenderOutlineShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = RenderOutlineShaders.metal; sourceTree = "<group>"; };
+		EE8F9D6E2CD4104C00CB0C2B /* RenderOutlineTechnique.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RenderOutlineTechnique.plist; sourceTree = "<group>"; };
 		EEC039932CCC1ED5003E0589 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EEC039952CCC253A003E0589 /* Models.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = Models.scnassets; sourceTree = "<group>"; };
 		EEC039972CCC3DE6003E0589 /* VirtualObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObject.swift; sourceTree = "<group>"; };
 		EEC0399A2CCCE0FD003E0589 /* ModelsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsMenuView.swift; sourceTree = "<group>"; };
 		EEC0399C2CCCE103003E0589 /* ModelsMenuController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsMenuController.swift; sourceTree = "<group>"; };
 		EEC0399F2CCCE148003E0589 /* ModelsMenuItemCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsMenuItemCell.swift; sourceTree = "<group>"; };
-		EEC039A12CCCE7E6003E0589 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		EEC5E9E62CCAC6D80040237B /* BaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseView.swift; sourceTree = "<group>"; };
 		EEC5E9E82CCAC6F00040237B /* BaseController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseController.swift; sourceTree = "<group>"; };
 		EEC5E9ED2CCAC78C0040237B /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		EEC5E9EF2CCAC7930040237B /* MainController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainController.swift; sourceTree = "<group>"; };
 		EEC5E9F22CCACF1D0040237B /* Plane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plane.swift; sourceTree = "<group>"; };
-		EEC5E9F42CCAD8270040237B /* ARKitExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARKitExtensions.swift; sourceTree = "<group>"; };
+		EEC5E9F42CCAD8270040237B /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,11 +112,38 @@
 				EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */,
 				EE1FE5FE2CCAC30000D30110 /* Info.plist */,
 				EEC5E9E02CCAC4B60040237B /* Extensions */,
+				EE3538EA2CD6B22300EBBF62 /* Managers */,
 				EEC5E9F12CCACF0D0040237B /* Virtual Objects */,
 				EEC5E9E12CCAC4C20040237B /* Controllers */,
 				EEC5E9DF2CCAC4A40040237B /* Resources */,
 			);
 			path = PlaceIt;
+			sourceTree = "<group>";
+		};
+		EE3538EA2CD6B22300EBBF62 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				EE3538EB2CD6B23900EBBF62 /* Object Interaction */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		EE3538EB2CD6B23900EBBF62 /* Object Interaction */ = {
+			isa = PBXGroup;
+			children = (
+				EE3538E82CD6455300EBBF62 /* VirtualObjectInteraction.swift */,
+				EE3538E62CD6407100EBBF62 /* ThresholdPanGesture.swift */,
+			);
+			path = "Object Interaction";
+			sourceTree = "<group>";
+		};
+		EE8F9D6F2CD4104C00CB0C2B /* scene_techniques */ = {
+			isa = PBXGroup;
+			children = (
+				EE8F9D6D2CD4104C00CB0C2B /* RenderOutlineShaders.metal */,
+				EE8F9D6E2CD4104C00CB0C2B /* RenderOutlineTechnique.plist */,
+			);
+			path = scene_techniques;
 			sourceTree = "<group>";
 		};
 		EEC039992CCCE0F4003E0589 /* ModelsMenu */ = {
@@ -134,6 +167,7 @@
 		EEC5E9DF2CCAC4A40040237B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				EE8F9D6F2CD4104C00CB0C2B /* scene_techniques */,
 				EEC039932CCC1ED5003E0589 /* Assets.xcassets */,
 				EE1FE5FB2CCAC30000D30110 /* LaunchScreen.storyboard */,
 				EE1FE5F62CCAC2FF00D30110 /* Main.storyboard */,
@@ -145,8 +179,7 @@
 		EEC5E9E02CCAC4B60040237B /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				EEC5E9F42CCAD8270040237B /* ARKitExtensions.swift */,
-				EEC039A12CCCE7E6003E0589 /* ViewExtensions.swift */,
+				EEC5E9F42CCAD8270040237B /* Extensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -243,6 +276,7 @@
 				EE1FE5FD2CCAC30000D30110 /* Base in Resources */,
 				EEC039962CCC253A003E0589 /* Models.scnassets in Resources */,
 				EEC039942CCC1ED5003E0589 /* Assets.xcassets in Resources */,
+				EE8F9D712CD4104C00CB0C2B /* RenderOutlineTechnique.plist in Resources */,
 				EE1FE5F82CCAC2FF00D30110 /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -301,12 +335,14 @@
 				EE1FE5F12CCAC2FF00D30110 /* AppDelegate.swift in Sources */,
 				EEC039A02CCCE148003E0589 /* ModelsMenuItemCell.swift in Sources */,
 				EEC0399B2CCCE0FD003E0589 /* ModelsMenuView.swift in Sources */,
-				EEC5E9F52CCAD8270040237B /* ARKitExtensions.swift in Sources */,
+				EEC5E9F52CCAD8270040237B /* Extensions.swift in Sources */,
 				EEC5E9E92CCAC6F00040237B /* BaseController.swift in Sources */,
-				EEC039A22CCCE7E6003E0589 /* ViewExtensions.swift in Sources */,
+				EE3538E92CD6455300EBBF62 /* VirtualObjectInteraction.swift in Sources */,
+				EE3538E72CD6407100EBBF62 /* ThresholdPanGesture.swift in Sources */,
 				EEC0399D2CCCE103003E0589 /* ModelsMenuController.swift in Sources */,
 				EEC039982CCC3DE6003E0589 /* VirtualObject.swift in Sources */,
 				EE1FE5F32CCAC2FF00D30110 /* SceneDelegate.swift in Sources */,
+				EE8F9D702CD4104C00CB0C2B /* RenderOutlineShaders.metal in Sources */,
 				EEC5E9E72CCAC6D80040237B /* BaseView.swift in Sources */,
 				EEC5E9F32CCACF1D0040237B /* Plane.swift in Sources */,
 			);

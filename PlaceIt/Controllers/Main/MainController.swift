@@ -25,15 +25,14 @@ class MainController: BaseController<MainView> {
     var planes = [UUID : Plane]()
     
     /// All models loaded to the scene.
-    var loadedModels = [SCNNode]()
+    var loadedModels = [VirtualObject]()
     
     /// Holds the model selected from the menu, ready to be placed in the scene.
     /// Set when the user picks a model from the `modelsMenuController`.
     var selectedModelToPlace: String?
     
-    /// Tracks a model already placed in the scene, selected for interaction.
-    /// Set when a user taps on a model that is already loaded onto the scene.
-    var selectedPlacedModel: SCNNode?
+    /// A type which manages gesture manipulation of virtual content in the scene.
+    lazy var virtualObjectInteraction = VirtualObjectInteraction(sceneView: sceneView, controller: self)
     
     /// Convenience accessor for the sceneView owned by `MainView`.
     var sceneView: ARSCNView {
@@ -77,8 +76,10 @@ class MainController: BaseController<MainView> {
         modelsMenuController = ModelsMenuController()
         modelsMenuController.delegate = self
         
-        addTapGesture()
         self.contentView.showModelsMenuButton.addTarget(self, action: #selector(showModelsMenuButtonClick), for: .touchUpInside)
+        
+        loadHighlightTechnique()
+        addTapGesture()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -111,12 +112,18 @@ class MainController: BaseController<MainView> {
     }
 }
 
+// MARK: - Actions
+extension MainController {
+    @objc func showModelsMenuButtonClick() {
+        showModelsMenu()
+    }
+}
+
 // MARK: - Gestures
 
 extension MainController {
     func addTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSceneView(withGestureRecognizer:)))
-        sceneView.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
         sceneView.addGestureRecognizer(tapGesture)
     }
     
@@ -124,12 +131,12 @@ extension MainController {
     /// 1. Dismisses the menu if it's open.
     /// 2. Places a selected model if one is picked from the menu.
     /// 3. Selects an already placed model for interaction if tapped.
-    @objc func didTapSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
+    @objc func didTap(_ gesture: UIGestureRecognizer) {
+        let touchLocation = gesture.location(in: sceneView)
         if menuState == .opened {
             // Case 1
             if let selectedModelToPlace = selectedModelToPlace {
-                let tapLocation = recognizer.location(in: sceneView)
-                guard let raycastQuery = sceneView.raycastQuery(from: tapLocation, allowing: .existingPlaneGeometry, alignment: .any) else { return }
+                guard let raycastQuery = sceneView.raycastQuery(from: touchLocation, allowing: .existingPlaneGeometry, alignment: .any) else { return }
                 guard let raycastResult = session.raycast(raycastQuery).first else { return }
                 
                 let translation = raycastResult.worldTransform.translation
@@ -141,45 +148,40 @@ extension MainController {
             // Case 1, 2
             hideModelsMenu()
         } else {
-            // Case 3
-            // TODO: Object Interaction
+            guard let object = objectInteracting(with: gesture, in: sceneView) else { return }
+            
+            if (object != virtualObjectInteraction.trackedObject) {
+                virtualObjectInteraction.trackedObject?.toggleHighlight()
+                object.toggleHighlight()
+                
+                virtualObjectInteraction.trackedObject = object
+            }
         }
     }
-}
-
-// MARK: - Actions
-extension MainController {
-    @objc func showModelsMenuButtonClick() {
-        showModelsMenu()
-    }
-}
-
-// MARK: - ARSCNViewDelegate
-
-extension MainController: ARSCNViewDelegate {
-    func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
-        guard planeAnchor.classification == .floor else { return }
-        
-        // When a new plane is detected we create a new SceneKit plane to visualize it in 3D
-        let plane = Plane(with: planeAnchor)
-        self.planes[planeAnchor.identifier] = plane
-        node.addChildNode(plane)
-    }
     
-    func renderer(_ renderer: any SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        guard let plane = planes[anchor.identifier] else { return }
+    /** A helper method to return the first object that is found under the provided `gesture`s touch locations.
+     Performs hit tests using the touch locations provided by gesture recognizers. By hit testing against the bounding
+     boxes of the virtual objects, this function makes it more likely that a user touch will affect the object even if the
+     touch location isn't on a point where the object has visible content. By performing multiple hit tests for multitouch
+     gestures, the method makes it more likely that the user touch affects the intended object.
+      - Tag: TouchTesting
+    */
+    private func objectInteracting(with gesture: UIGestureRecognizer, in view: ARSCNView) -> VirtualObject? {
+        for index in 0..<gesture.numberOfTouches {
+            let touchLocation = gesture.location(ofTouch: index, in: view)
+            
+            // Look for an object directly under the `touchLocation`.
+            if let object = sceneView.virtualObject(at: touchLocation) {
+                return object
+            }
+        }
         
-        // When an anchor is updated we need to also update our 3D geometry too. For example
-        // the width and height of the plane detection may have changed so we need to update
-        // our SceneKit geometry to match that
-        plane.update(with: anchor as! ARPlaneAnchor)
-    }
-    
-    func renderer(_ renderer: any SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
-        // Nodes will be removed if multiple individual planes that are detected to all be
-        // part of a larger plane are merged.
-        planes.removeValue(forKey: anchor.identifier)
+        // As a last resort look for an object under the center of the touches.
+        if let center = gesture.center(in: view) {
+            return sceneView.virtualObject(at: center)
+        }
+        
+        return nil
     }
 }
 
@@ -189,11 +191,12 @@ extension MainController {
     func addModel(withName modelName: String, translation: SIMD3<Float>) {
         guard let scene = SCNScene(named: "Models.scnassets/\(modelName).dae") else { return }
         
-        let node = SCNNode()
-        scene.rootNode.childNodes.forEach { node.addChildNode($0) }
-        node.position = SCNVector3(translation)
-        node.scale = SCNVector3(0.5, 0.5, 0.5)
-        sceneView.scene.rootNode.addChildNode(node)
+        let virtualObject = VirtualObject()
+        scene.rootNode.childNodes.forEach { virtualObject.addChildNode($0) }
+        virtualObject.position = SCNVector3(translation)
+//        virtualObject.scale = SCNVector3(0.5, 0.5, 0.5)
+        sceneView.scene.rootNode.addChildNode(virtualObject)
+        loadedModels.append(virtualObject)
     }
 }
 
@@ -201,6 +204,7 @@ extension MainController {
 // MARK: - Model Selection Menu
 
 extension MainController {
+    /// Attaches the `modelsMenuController` as a child controller to the `MainController`.
     private func attachModelsMenuController() {
         modelsMenuController.view.frame = CGRect(
             x: self.view.width,
@@ -243,9 +247,77 @@ extension MainController {
     }
 }
 
+// MARK: - ARSCNViewDelegate
+
+extension MainController: ARSCNViewDelegate {
+    func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+        guard planeAnchor.classification == .floor else { return }
+        
+        // When a new plane is detected we create a new SceneKit plane to visualize it in 3D
+        let plane = Plane(with: planeAnchor)
+        self.planes[planeAnchor.identifier] = plane
+        node.addChildNode(plane)
+    }
+    
+    func renderer(_ renderer: any SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        guard let plane = planes[anchor.identifier] else { return }
+        
+        // When an anchor is updated we need to also update our 3D geometry too. For example
+        // the width and height of the plane detection may have changed so we need to update
+        // our SceneKit geometry to match that
+        plane.update(with: anchor as! ARPlaneAnchor)
+    }
+    
+    func renderer(_ renderer: any SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
+        // Nodes will be removed if multiple individual planes that are detected to all be
+        // part of a larger plane are merged.
+        planes.removeValue(forKey: anchor.identifier)
+    }
+}
+
 // MARK: - ModelsMenuControllerDelegate
+
 extension MainController: ModelsMenuControllerDelegate {
     func didSelectModel(modelName: String?) {
         selectedModelToPlace = modelName
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension MainController: UIGestureRecognizerDelegate {
+    // Allow objects to be translated and rotated at the same time.
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+}
+
+// MARK: - Highlight Technique
+
+extension MainController {
+    /// Loads the technique that is used to achieve a highlight effect around selected `VirtualObject`.
+    func loadHighlightTechnique() {
+        if let fileUrl = Bundle.main.url(forResource: "RenderOutlineTechnique", withExtension: "plist"), let data = try? Data(contentsOf: fileUrl) {
+          if var result = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] { // [String: Any] which ever it is
+            
+            // Update the size and scale factor in the original technique file
+            // to whichever size and scale factor the current device is so that
+            // we avoid crazy aliasing
+            let nativePoints = UIScreen.main.bounds
+            let nativeScale = UIScreen.main.nativeScale
+            result[keyPath: "targets.MASK.size"] = "\(nativePoints.width)x\(nativePoints.height)"
+            result[keyPath: "targets.MASK.scaleFactor"] = nativeScale
+            
+            guard let technique = SCNTechnique(dictionary: result) else {
+              fatalError("This shouldn't be happening.")
+            }
+
+            sceneView.technique = technique
+          }
+        }
+        else {
+          fatalError("This shouldn't be happening! Technique file has been deleted.")
+        }
     }
 }

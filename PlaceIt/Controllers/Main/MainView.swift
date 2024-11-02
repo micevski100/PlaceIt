@@ -23,6 +23,7 @@ class MainView: BaseView {
         sceneView.autoenablesDefaultLighting = false
         sceneView.automaticallyUpdatesLighting = false
         sceneView.showsStatistics = true
+        sceneView.isUserInteractionEnabled = true
         sceneView.debugOptions = [.showFeaturePoints, .showWorldOrigin]
         self.addSubview(sceneView)
         
