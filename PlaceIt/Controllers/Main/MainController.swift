@@ -27,12 +27,18 @@ class MainController: BaseController<MainView> {
     /// All models loaded to the scene.
     var loadedModels = [VirtualObject]()
     
+    /// The view controller that displays the object selection menu.
+    var modelsMenuController: ModelsMenuController!
+    
     /// Holds the model selected from the menu, ready to be placed in the scene.
     /// Set when the user picks a model from the `modelsMenuController`.
     var selectedModelToPlace: String?
     
     /// A type which manages gesture manipulation of virtual content in the scene.
     lazy var virtualObjectInteraction = VirtualObjectInteraction(sceneView: sceneView, controller: self)
+    
+    /// A serial queue used to coordinate adding or removing nodes from the scene.
+    let updateQueue = DispatchQueue(label: "serialSceneKitQueue")
     
     /// Convenience accessor for the sceneView owned by `MainView`.
     var sceneView: ARSCNView {
@@ -46,9 +52,6 @@ class MainController: BaseController<MainView> {
     
     /// Current state of the `modelsMenuController`.
     var menuState: MenuState = .closed
-    
-    /// The view controller that displays the object selection menu.
-    var modelsMenuController: ModelsMenuController!
     
     /// Lock the orientation of the app to the orientation in which it is launched
     override var shouldAutorotate: Bool {
@@ -194,8 +197,10 @@ extension MainController {
         let virtualObject = VirtualObject()
         scene.rootNode.childNodes.forEach { virtualObject.addChildNode($0) }
         virtualObject.position = SCNVector3(translation)
-//        virtualObject.scale = SCNVector3(0.5, 0.5, 0.5)
-        sceneView.scene.rootNode.addChildNode(virtualObject)
+        updateQueue.async {
+            self.sceneView.scene.rootNode.addChildNode(virtualObject)
+            self.sceneView.addOrUpdateAnchor(for: virtualObject)
+        }
         loadedModels.append(virtualObject)
     }
 }
@@ -255,18 +260,28 @@ extension MainController: ARSCNViewDelegate {
         guard planeAnchor.classification == .floor else { return }
         
         // When a new plane is detected we create a new SceneKit plane to visualize it in 3D
-        let plane = Plane(with: planeAnchor)
-        self.planes[planeAnchor.identifier] = plane
-        node.addChildNode(plane)
+        updateQueue.async {
+            let plane = Plane(with: planeAnchor)
+            self.planes[planeAnchor.identifier] = plane
+            node.addChildNode(plane)
+        }
     }
     
     func renderer(_ renderer: any SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        guard let plane = planes[anchor.identifier] else { return }
+        // Update Plane Geometry to match updated anchor
+        DispatchQueue.main.async {
+            if let plane = self.planes[anchor.identifier] {
+                plane.update(with: anchor as! ARPlaneAnchor)
+            }
+        }
         
-        // When an anchor is updated we need to also update our 3D geometry too. For example
-        // the width and height of the plane detection may have changed so we need to update
-        // our SceneKit geometry to match that
-        plane.update(with: anchor as! ARPlaneAnchor)
+        // Update VirtualObject anchor
+        updateQueue.async {
+            if let objectAtAnchor = self.loadedModels.first(where: { $0.anchor == anchor }) {
+                objectAtAnchor.simdPosition = anchor.transform.translation
+                objectAtAnchor.anchor = anchor
+            }
+        }
     }
     
     func renderer(_ renderer: any SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {

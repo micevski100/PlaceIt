@@ -62,6 +62,11 @@ extension VirtualObjectInteraction {
             // Ignore the pan gesture until the displacement threshold is exceeded.
             break
         case .ended:
+            // Update the object's position when the user stops panning.
+            guard let object = trackedObject else { break }
+            controller.updateQueue.async {
+                self.sceneView.addOrUpdateAnchor(for: object)
+            }
             fallthrough
         default:
             // Reset the current tracking position.
