@@ -28,6 +28,7 @@
 		EEC5E9F02CCAC7930040237B /* MainController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9EF2CCAC7930040237B /* MainController.swift */; };
 		EEC5E9F32CCACF1D0040237B /* Plane.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9F22CCACF1D0040237B /* Plane.swift */; };
 		EEC5E9F52CCAD8270040237B /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC5E9F42CCAD8270040237B /* Extensions.swift */; };
+		EEE1D4182CDC1E0E00BC2CF8 /* SnapshotAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE1D4172CDC1E0E00BC2CF8 /* SnapshotAnchor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,7 @@
 		EEC5E9EF2CCAC7930040237B /* MainController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainController.swift; sourceTree = "<group>"; };
 		EEC5E9F22CCACF1D0040237B /* Plane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plane.swift; sourceTree = "<group>"; };
 		EEC5E9F42CCAD8270040237B /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		EEE1D4172CDC1E0E00BC2CF8 /* SnapshotAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotAnchor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,6 +211,7 @@
 			children = (
 				EEC5E9F22CCACF1D0040237B /* Plane.swift */,
 				EEC039972CCC3DE6003E0589 /* VirtualObject.swift */,
+				EEE1D4172CDC1E0E00BC2CF8 /* SnapshotAnchor.swift */,
 			);
 			path = "Virtual Objects";
 			sourceTree = "<group>";
@@ -340,6 +343,7 @@
 				EE3538E92CD6455300EBBF62 /* VirtualObjectInteraction.swift in Sources */,
 				EE3538E72CD6407100EBBF62 /* ThresholdPanGesture.swift in Sources */,
 				EEC0399D2CCCE103003E0589 /* ModelsMenuController.swift in Sources */,
+				EEE1D4182CDC1E0E00BC2CF8 /* SnapshotAnchor.swift in Sources */,
 				EEC039982CCC3DE6003E0589 /* VirtualObject.swift in Sources */,
 				EE1FE5F32CCAC2FF00D30110 /* SceneDelegate.swift in Sources */,
 				EE8F9D702CD4104C00CB0C2B /* RenderOutlineShaders.metal in Sources */,

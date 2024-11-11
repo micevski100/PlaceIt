@@ -52,7 +52,7 @@ extension ModelsMenuController: UICollectionViewDelegate, UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ModelsMenuItemCell.reuseIdentifier, for: indexPath) as! ModelsMenuItemCell
+        let cell = collectionView.cellForItem(at: indexPath) as! ModelsMenuItemCell
         
         if cell.isSelected {
             collectionView.deselectItem(at: indexPath, animated: true)

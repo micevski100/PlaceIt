@@ -11,7 +11,10 @@ import SceneKit
 
 class VirtualObject: SCNNode {
     
+    
     let id: UUID!
+    
+    var modelName: String
     
     /// The object's corresponding ARAnchor.
     var anchor: ARAnchor?
@@ -22,8 +25,8 @@ class VirtualObject: SCNNode {
     }
     
     /// Rotates the first child node of a virtual object.
-    /// - Note: For correct rotation on horizontal and vertical surfaces, rotate around
-    /// local y rather than world y.
+    /// - Note: For correct rotation on horizontal and vertical surfaces,
+    /// rotate around local y rather than world y.
     var objectRotation: Float {
         get {
             return childNodes.first!.eulerAngles.y
@@ -33,7 +36,10 @@ class VirtualObject: SCNNode {
         }
     }
     
-    override init() {
+    
+    // MARK: - Serialization
+    required init(name: String) {
+        self.modelName = name
         self.id = UUID()
         super.init()
         
@@ -42,8 +48,26 @@ class VirtualObject: SCNNode {
         self.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    required init?(coder aDecoder: NSCoder) {
+        guard let id = aDecoder.decodeObject(of: [NSUUID.self], forKey: "id") as? UUID else { return nil}
+        guard let modelName = aDecoder.decodeObject(of: [NSString.self], forKey: "modelName") as? String else { return nil }
+        guard let anchor = aDecoder.decodeObject(of: [ARAnchor.self], forKey: "anchor") as? ARAnchor else { return nil }
+        
+        self.id = id
+        self.modelName = modelName
+        self.anchor = anchor
+        super.init(coder: aDecoder)
+    }
+    
+    override func encode(with aCoder: NSCoder) {
+        super.encode(with: aCoder)
+        aCoder.encode(id, forKey: "id")
+        aCoder.encode(modelName, forKey: "modelName")
+        aCoder.encode(anchor, forKey: "anchor")
+    }
+    
+    override class var supportsSecureCoding: Bool {
+        return true
     }
 }
 

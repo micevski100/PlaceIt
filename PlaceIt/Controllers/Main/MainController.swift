@@ -27,18 +27,73 @@ class MainController: BaseController<MainView> {
     /// All models loaded to the scene.
     var loadedModels = [VirtualObject]()
     
-    /// The view controller that displays the object selection menu.
-    var modelsMenuController: ModelsMenuController!
-    
     /// Holds the model selected from the menu, ready to be placed in the scene.
     /// Set when the user picks a model from the `modelsMenuController`.
     var selectedModelToPlace: String?
+    
+    /// Current state of the `modelsMenuController`.
+    var menuState: MenuState = .closed
+    
+    /// The view controller that displays the object selection menu.
+    var modelsMenuController: ModelsMenuController!
     
     /// A type which manages gesture manipulation of virtual content in the scene.
     lazy var virtualObjectInteraction = VirtualObjectInteraction(sceneView: sceneView, controller: self)
     
     /// A serial queue used to coordinate adding or removing nodes from the scene.
     let updateQueue = DispatchQueue(label: "serialSceneKitQueue")
+    
+    /// Initial AR session configuration.
+    var defaultConfiguration: ARWorldTrackingConfiguration {
+        let config = ARWorldTrackingConfiguration()
+        config.planeDetection = .horizontal
+        config.worldAlignment = .gravity
+        config.providesAudioData = false
+        config.isLightEstimationEnabled = false
+        config.environmentTexturing = .none
+        return config
+    }
+    
+    /// Indicates if the mapp is restoring a previous AR session.
+    var isRelocalizingMap = false
+    
+    /// Location of the saved map on disk.
+    lazy var mapSaveUrl: URL = {
+        do {
+            return try FileManager.default
+                .url(for: .documentDirectory,
+                     in: .userDomainMask,
+                     appropriateFor: nil,
+                     create: true)
+                .appendingPathComponent("map.arexperience")
+        } catch {
+            fatalError("Can't get map file save URL: \(error.localizedDescription)")
+        }
+    }()
+    
+    /// Location of the saved models on disk.
+    lazy var modelsSaveUrl: URL = {
+        do {
+            return try FileManager.default
+                .url(for: .documentDirectory,
+                     in: .userDomainMask,
+                     appropriateFor: nil,
+                     create: true)
+                .appendingPathComponent("models.arexperience")
+        } catch {
+            fatalError("Can't get models file save URL: \(error.localizedDescription)")
+        }
+    }()
+    
+    /// Raw data if tge saved AR map.
+    var mapDataFromFile: Data? {
+        return try? Data(contentsOf: mapSaveUrl)
+    }
+    
+    /// Raw data of the saved AR models.
+    var modelsDataFromFile: Data? {
+        return try? Data(contentsOf: modelsSaveUrl)
+    }
     
     /// Convenience accessor for the sceneView owned by `MainView`.
     var sceneView: ARSCNView {
@@ -49,9 +104,6 @@ class MainController: BaseController<MainView> {
     var session: ARSession {
         return contentView.sceneView.session
     }
-    
-    /// Current state of the `modelsMenuController`.
-    var menuState: MenuState = .closed
     
     /// Lock the orientation of the app to the orientation in which it is launched
     override var shouldAutorotate: Bool {
@@ -74,12 +126,22 @@ class MainController: BaseController<MainView> {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Read in any already saved map to see if we can load one.
+        if mapDataFromFile != nil {
+            self.contentView.loadExperienceButton.isHidden = false
+            self.contentView.loadExperienceButton.isEnabled = true
+            self.contentView.loadExperienceButton.backgroundColor = .systemBlue
+        }
+        
         sceneView.delegate = self
+        session.delegate = self
         
         modelsMenuController = ModelsMenuController()
         modelsMenuController.delegate = self
         
         self.contentView.showModelsMenuButton.addTarget(self, action: #selector(showModelsMenuButtonClick), for: .touchUpInside)
+        self.contentView.saveExperienceButton.addTarget(self, action: #selector(saveExperienceButtonClick), for: .touchUpInside)
+        self.contentView.loadExperienceButton.addTarget(self, action: #selector(loadExperienceButtonClick), for: .touchUpInside)
         
         loadHighlightTechnique()
         addTapGesture()
@@ -93,14 +155,7 @@ class MainController: BaseController<MainView> {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        let config = ARWorldTrackingConfiguration()
-        config.planeDetection = .horizontal
-        config.worldAlignment = .gravity
-        config.providesAudioData = false
-        config.isLightEstimationEnabled = false
-        config.environmentTexturing = .none
-        session.run(config)
-        
+        session.run(defaultConfiguration)
         attachModelsMenuController()
         
         // Prevent the screen from being dimmed after a while as users will likely
@@ -115,21 +170,235 @@ class MainController: BaseController<MainView> {
     }
 }
 
-// MARK: - Actions
+// MARK: - ARSCNViewDelegate
+
+extension MainController: ARSCNViewDelegate {
+    func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        if let planeAnchor = anchor as? ARPlaneAnchor {
+            guard planeAnchor.classification == .floor else { return }
+            
+            // When a new plane is detected we create a new SceneKit plane to visualize it in 3D
+            updateQueue.async {
+                let plane = Plane(with: planeAnchor)
+                self.planes[planeAnchor.identifier] = plane
+                node.addChildNode(plane)
+            }
+        } else {
+            // Save the reference to the VirtualObject's anchor when the anchor is added from relocalizing.
+            guard let object = loadedModels.first(where: { $0.anchor == anchor }) else { return }
+            updateQueue.async {
+//                object.anchor = anchor
+                self.sceneView.scene.rootNode.addChildNode(object)
+                print("NUMBER OF MODELS: \(self.loadedModels.count)")
+            }
+        }
+    }
+    
+    func renderer(_ renderer: any SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        // Update Plane Geometry to match updated anchor
+        DispatchQueue.main.async {
+            if let plane = self.planes[anchor.identifier] {
+                plane.update(with: anchor as! ARPlaneAnchor)
+            }
+        }
+        
+        // Update VirtualObject anchor
+        updateQueue.async {
+            if let objectAtAnchor = self.loadedModels.first(where: { $0.anchor == anchor }) {
+                objectAtAnchor.simdPosition = anchor.transform.translation
+                objectAtAnchor.anchor = anchor
+            }
+        }
+    }
+    
+    func renderer(_ renderer: any SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
+        // Nodes will be removed if multiple individual planes that are detected to all be
+        // part of a larger plane are merged.
+        planes.removeValue(forKey: anchor.identifier)
+    }
+}
+
+// MARK: - ARSessionDelegate
+
+extension MainController: ARSessionDelegate {
+    func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera) {
+        updateSessionInfoLabel(for: session.currentFrame!, trackingState: camera.trackingState)
+    }
+    
+    func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        // Enable Save button only when the mapping status is good and an object has been placed
+        switch frame.worldMappingStatus {
+        case .extending, .mapped:
+            contentView.saveExperienceButton.isHidden = !containingObject(for: frame)
+        default:
+            contentView.saveExperienceButton.isHidden = true
+        }
+    }
+    
+    func session(_ session: ARSession, didFailWithError error: any Error) {
+        contentView.sessionInfoLabel.text = "Session failed: \(error.localizedDescription)"
+        guard error is ARError else { return }
+        
+        let errorWithInfo = error as NSError
+        let messages = [
+            errorWithInfo.localizedDescription,
+            errorWithInfo.localizedFailureReason,
+            errorWithInfo.localizedRecoverySuggestion
+        ]
+        
+        // Remove optional error messages.
+        let errorMessage = messages.compactMap { $0 }.joined(separator: "\n")
+        
+        DispatchQueue.main.async {
+            let alertController = UIAlertController(title: "The AR session failed.", message: errorMessage, preferredStyle: .alert)
+            let restartAction = UIAlertAction(title: "Restart Session", style: .default) { _ in
+                // TODO: Restart Session
+            }
+            alertController.addAction(restartAction)
+            self.present(alertController, animated: true)
+        }
+    }
+    
+    func sessionWasInterrupted(_ session: ARSession) {
+        contentView.sessionInfoLabel.text = "Session was interrupted"
+    }
+    
+    func sessionInterruptionEnded(_ session: ARSession) {
+        // Reset tracking and/or remove existing anchors if consistent tracking is required.
+        contentView.sessionInfoLabel.text = "Session interruption ended"
+    }
+    
+    func sessionShouldAttemptRelocalization(_ session: ARSession) -> Bool {
+        return true
+    }
+    
+    private func updateSessionInfoLabel(for frame: ARFrame, trackingState: ARCamera.TrackingState) {
+        // Update the UI to provide feedback on the state of the AR experience.
+        let message: String
+        
+        contentView.snapshotThumbnailImageView.isHidden = true
+        switch (trackingState, frame.worldMappingStatus) {
+        case (.normal, .mapped), (.normal, .extending):
+            if containingObject(for: frame) {
+                // User has placed an object in scene and the session is mapped, prompt them to save the experience
+                message = "Tap 'Save Experience' to save the current map."
+            } else {
+                message = "Tap on the screen to place an object."
+            }
+            
+        case (.normal, _) where mapDataFromFile != nil && !isRelocalizingMap:
+            message = "Move around to map the environment or tap 'Load Experience' to load a saved experience."
+            
+        case (.normal, _) where mapDataFromFile == nil:
+            message = "Move around to map the environment."
+        
+        case (.limited(.relocalizing), _) where isRelocalizingMap:
+            message = "Move your device to the location shown in the image."
+            contentView.snapshotThumbnailImageView.isHidden = false
+        
+        default:
+            message = trackingState.localizedFeedback
+        }
+        
+        contentView.sessionInfoLabel.text = message
+        contentView.sessionInfoView.isHidden = message.isEmpty
+    }
+    
+    private func containingObject(for frame: ARFrame) -> Bool {
+        return frame.anchors.contains(where: { anchor in loadedModels.contains { $0.anchor == anchor } })
+    }
+}
+
+// MARK: - Button Actions
 extension MainController {
     @objc func showModelsMenuButtonClick() {
         showModelsMenu()
     }
-}
-
-// MARK: - Gestures
-
-extension MainController {
-    func addTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
-        sceneView.addGestureRecognizer(tapGesture)
+    
+    @objc func saveExperienceButtonClick() {
+        session.getCurrentWorldMap { worlMap, error in
+            guard let map = worlMap else {
+                self.showAlert(title: "Can't get current world map", message: error!.localizedDescription)
+                return
+            }
+            
+            // Add a snapshot image indicating where the map was captured.
+            guard let snapshotAnchor = SnapshotAnchor(capturing: self.sceneView) else { fatalError("Can't take snapshot") }
+            map.anchors.append(snapshotAnchor)
+            
+            do {
+                let data = try NSKeyedArchiver.archivedData(withRootObject: self.loadedModels, requiringSecureCoding: true)
+                try data.write(to: self.modelsSaveUrl, options: [.atomic])
+                print("objects saved")
+            } catch {
+                fatalError("Can't save models: \(error.localizedDescription)")
+            }
+            
+            do {
+                let data = try NSKeyedArchiver.archivedData(withRootObject: map, requiringSecureCoding: true)
+                try data.write(to: self.mapSaveUrl, options: [.atomic])
+                print("map saved")
+                
+                DispatchQueue.main.async {
+                    self.contentView.loadExperienceButton.isEnabled = true
+                    self.contentView.loadExperienceButton.backgroundColor = .systemBlue
+                }
+            } catch {
+                fatalError("Can't save map: \(error.localizedDescription)")
+            }
+        }
     }
     
+    @objc func loadExperienceButtonClick() {
+        let worldMap: ARWorldMap = {
+            guard let mapData = mapDataFromFile else { fatalError("Map data should already be verified to exist before Load button is enabled.") }
+            
+            do {
+                guard let worldMap = try NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: mapData) else { fatalError("No ARWorldmap in archive.") }
+                print("loaded map")
+                return worldMap
+            } catch {
+                fatalError("Can't unarchive ARWorldMap from file data: \(error)")
+            }
+        }()
+        
+        let savedModels: [VirtualObject] = {
+            guard let modelsData = modelsDataFromFile else { fatalError("Models data should already be verified to exist before Load button is enabled.") }
+            
+            do {
+                guard let models = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSArray.self, VirtualObject.self], from: modelsData) as? [VirtualObject] else {
+                    fatalError("No [VirtualObject] in archive.")
+                }
+                print("loaded models: \(models.count)")
+                return models
+            } catch {
+                fatalError("Can't unarchive [VirtualObject] from file data: \(error)")
+            }
+        }()
+        
+        // Display the snapshot image stored in the world map to aid user in relocalizing.
+        if let snapshotData = worldMap.snapshotAnchor?.imageData,
+           let snapshot = UIImage(data: snapshotData) {
+            contentView.snapshotThumbnailImageView.image = snapshot
+        } else {
+            print("No snapshot image in world map")
+        }
+        
+        // Remove the snapshot anchor from the world map since we do not need it in the scene.
+        worldMap.anchors.removeAll { $0 is SnapshotAnchor }
+        
+        let configuration = self.defaultConfiguration // The app's standard world tracking settings.
+        configuration.initialWorldMap = worldMap
+        sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+        
+        isRelocalizingMap = true
+        loadedModels = savedModels
+    }
+}
+
+// MARK: - Model Placement and Interaction
+
+extension MainController {
     /// Handles taps on the scene view and performs actions based on context:
     /// 1. Dismisses the menu if it's open.
     /// 2. Places a selected model if one is picked from the menu.
@@ -186,15 +455,18 @@ extension MainController {
         
         return nil
     }
+    
+    private func addTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
+        sceneView.addGestureRecognizer(tapGesture)
+    }
 }
 
-// MARK: - Model Placement
-
 extension MainController {
-    func addModel(withName modelName: String, translation: SIMD3<Float>) {
+    private func addModel(withName modelName: String, translation: SIMD3<Float>) {
         guard let scene = SCNScene(named: "Models.scnassets/\(modelName).dae") else { return }
         
-        let virtualObject = VirtualObject()
+        let virtualObject = VirtualObject(name: modelName)
         scene.rootNode.childNodes.forEach { virtualObject.addChildNode($0) }
         virtualObject.position = SCNVector3(translation)
         updateQueue.async {
@@ -202,11 +474,39 @@ extension MainController {
             self.sceneView.addOrUpdateAnchor(for: virtualObject)
         }
         loadedModels.append(virtualObject)
+        
+        print("NUMBER OF MODELS: \(loadedModels.count)")
     }
 }
 
+extension MainController {
+    /// Loads the technique that is used to achieve a highlight effect around selected `VirtualObject`.
+    private func loadHighlightTechnique() {
+        if let fileUrl = Bundle.main.url(forResource: "RenderOutlineTechnique", withExtension: "plist"), let data = try? Data(contentsOf: fileUrl) {
+          if var result = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] { // [String: Any] which ever it is
+            
+            // Update the size and scale factor in the original technique file
+            // to whichever size and scale factor the current device is so that
+            // we avoid crazy aliasing
+            let nativePoints = UIScreen.main.bounds
+            let nativeScale = UIScreen.main.nativeScale
+            result[keyPath: "targets.MASK.size"] = "\(nativePoints.width)x\(nativePoints.height)"
+            result[keyPath: "targets.MASK.scaleFactor"] = nativeScale
+            
+            guard let technique = SCNTechnique(dictionary: result) else {
+              fatalError("This shouldn't be happening.")
+            }
 
-// MARK: - Model Selection Menu
+            sceneView.technique = technique
+          }
+        }
+        else {
+          fatalError("This shouldn't be happening! Technique file has been deleted.")
+        }
+    }
+}
+
+// MARK: - Models Menu
 
 extension MainController {
     /// Attaches the `modelsMenuController` as a child controller to the `MainController`.
@@ -252,87 +552,8 @@ extension MainController {
     }
 }
 
-// MARK: - ARSCNViewDelegate
-
-extension MainController: ARSCNViewDelegate {
-    func renderer(_ renderer: any SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
-        guard planeAnchor.classification == .floor else { return }
-        
-        // When a new plane is detected we create a new SceneKit plane to visualize it in 3D
-        updateQueue.async {
-            let plane = Plane(with: planeAnchor)
-            self.planes[planeAnchor.identifier] = plane
-            node.addChildNode(plane)
-        }
-    }
-    
-    func renderer(_ renderer: any SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        // Update Plane Geometry to match updated anchor
-        DispatchQueue.main.async {
-            if let plane = self.planes[anchor.identifier] {
-                plane.update(with: anchor as! ARPlaneAnchor)
-            }
-        }
-        
-        // Update VirtualObject anchor
-        updateQueue.async {
-            if let objectAtAnchor = self.loadedModels.first(where: { $0.anchor == anchor }) {
-                objectAtAnchor.simdPosition = anchor.transform.translation
-                objectAtAnchor.anchor = anchor
-            }
-        }
-    }
-    
-    func renderer(_ renderer: any SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
-        // Nodes will be removed if multiple individual planes that are detected to all be
-        // part of a larger plane are merged.
-        planes.removeValue(forKey: anchor.identifier)
-    }
-}
-
-// MARK: - ModelsMenuControllerDelegate
-
 extension MainController: ModelsMenuControllerDelegate {
     func didSelectModel(modelName: String?) {
         selectedModelToPlace = modelName
-    }
-}
-
-// MARK: - UIGestureRecognizerDelegate
-
-extension MainController: UIGestureRecognizerDelegate {
-    // Allow objects to be translated and rotated at the same time.
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
-    }
-}
-
-// MARK: - Highlight Technique
-
-extension MainController {
-    /// Loads the technique that is used to achieve a highlight effect around selected `VirtualObject`.
-    func loadHighlightTechnique() {
-        if let fileUrl = Bundle.main.url(forResource: "RenderOutlineTechnique", withExtension: "plist"), let data = try? Data(contentsOf: fileUrl) {
-          if var result = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] { // [String: Any] which ever it is
-            
-            // Update the size and scale factor in the original technique file
-            // to whichever size and scale factor the current device is so that
-            // we avoid crazy aliasing
-            let nativePoints = UIScreen.main.bounds
-            let nativeScale = UIScreen.main.nativeScale
-            result[keyPath: "targets.MASK.size"] = "\(nativePoints.width)x\(nativePoints.height)"
-            result[keyPath: "targets.MASK.scaleFactor"] = nativeScale
-            
-            guard let technique = SCNTechnique(dictionary: result) else {
-              fatalError("This shouldn't be happening.")
-            }
-
-            sceneView.technique = technique
-          }
-        }
-        else {
-          fatalError("This shouldn't be happening! Technique file has been deleted.")
-        }
     }
 }
