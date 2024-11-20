@@ -16,9 +16,11 @@ class MainController: BaseController<MainView> {
     
     // MARK: - Types
     
-    enum MenuState { case opened, closed }
+    
     
     // MARK: - Properties
+    
+    var room: Room!
     
     /// All surface planes that ARKit has detected.
     /// - Used for visualizing detected planes.
@@ -57,44 +59,6 @@ class MainController: BaseController<MainView> {
     /// Indicates if the mapp is restoring a previous AR session.
     var isRelocalizingMap = false
     
-    /// Location of the saved map on disk.
-    lazy var mapSaveUrl: URL = {
-        do {
-            return try FileManager.default
-                .url(for: .documentDirectory,
-                     in: .userDomainMask,
-                     appropriateFor: nil,
-                     create: true)
-                .appendingPathComponent("map.arexperience")
-        } catch {
-            fatalError("Can't get map file save URL: \(error.localizedDescription)")
-        }
-    }()
-    
-    /// Location of the saved models on disk.
-    lazy var modelsSaveUrl: URL = {
-        do {
-            return try FileManager.default
-                .url(for: .documentDirectory,
-                     in: .userDomainMask,
-                     appropriateFor: nil,
-                     create: true)
-                .appendingPathComponent("models.arexperience")
-        } catch {
-            fatalError("Can't get models file save URL: \(error.localizedDescription)")
-        }
-    }()
-    
-    /// Raw data if tge saved AR map.
-    var mapDataFromFile: Data? {
-        return try? Data(contentsOf: mapSaveUrl)
-    }
-    
-    /// Raw data of the saved AR models.
-    var modelsDataFromFile: Data? {
-        return try? Data(contentsOf: modelsSaveUrl)
-    }
-    
     /// Convenience accessor for the sceneView owned by `MainView`.
     var sceneView: ARSCNView {
         return contentView.sceneView
@@ -117,21 +81,15 @@ class MainController: BaseController<MainView> {
     
     // MARK: - Life Cycle
     
-    class func factoryController() -> UINavigationController {
+    class func factoryController(_ room: Room) -> BaseController<MainView> {
         let controller = MainController()
-        let mainController = UINavigationController(rootViewController: controller)
-        return mainController
+        controller.room = room
+        return controller
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Read in any already saved map to see if we can load one.
-        if mapDataFromFile != nil {
-            self.contentView.loadExperienceButton.isHidden = false
-            self.contentView.loadExperienceButton.isEnabled = true
-            self.contentView.loadExperienceButton.backgroundColor = .systemBlue
-        }
+        self.navigationController?.navigationBar.tintColor = .white
         
         sceneView.delegate = self
         session.delegate = self
@@ -141,7 +99,6 @@ class MainController: BaseController<MainView> {
         
         self.contentView.showModelsMenuButton.addTarget(self, action: #selector(showModelsMenuButtonClick), for: .touchUpInside)
         self.contentView.saveExperienceButton.addTarget(self, action: #selector(saveExperienceButtonClick), for: .touchUpInside)
-        self.contentView.loadExperienceButton.addTarget(self, action: #selector(loadExperienceButtonClick), for: .touchUpInside)
         
         loadHighlightTechnique()
         addTapGesture()
@@ -149,7 +106,7 @@ class MainController: BaseController<MainView> {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(true, animated: false)
+        self.navigationController?.navigationBar.prefersLargeTitles = false
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -157,6 +114,11 @@ class MainController: BaseController<MainView> {
         
         session.run(defaultConfiguration)
         attachModelsMenuController()
+        
+        // Read in any already saved map to see if we can load one.
+        if room.isArchived {
+            loadExperience()
+        }
         
         // Prevent the screen from being dimmed after a while as users will likely
         // have long periods of interaction without touching the screen or buttons.
@@ -187,9 +149,7 @@ extension MainController: ARSCNViewDelegate {
             // Save the reference to the VirtualObject's anchor when the anchor is added from relocalizing.
             guard let object = loadedModels.first(where: { $0.anchor == anchor }) else { return }
             updateQueue.async {
-//                object.anchor = anchor
                 self.sceneView.scene.rootNode.addChildNode(object)
-                print("NUMBER OF MODELS: \(self.loadedModels.count)")
             }
         }
     }
@@ -286,10 +246,7 @@ extension MainController: ARSessionDelegate {
                 message = "Tap on the screen to place an object."
             }
             
-        case (.normal, _) where mapDataFromFile != nil && !isRelocalizingMap:
-            message = "Move around to map the environment or tap 'Load Experience' to load a saved experience."
-            
-        case (.normal, _) where mapDataFromFile == nil:
+        case (.normal, _) where !room.isArchived:
             message = "Move around to map the environment."
         
         case (.limited(.relocalizing), _) where isRelocalizingMap:
@@ -327,52 +284,29 @@ extension MainController {
             map.anchors.append(snapshotAnchor)
             
             do {
-                let data = try NSKeyedArchiver.archivedData(withRootObject: self.loadedModels, requiringSecureCoding: true)
-                try data.write(to: self.modelsSaveUrl, options: [.atomic])
-                print("objects saved")
+                try self.room.setWorldMap(map)
+                try self.room.setObjects(self.loadedModels)
+                try RoomManager.shared.save(room: self.room)
             } catch {
-                fatalError("Can't save models: \(error.localizedDescription)")
-            }
-            
-            do {
-                let data = try NSKeyedArchiver.archivedData(withRootObject: map, requiringSecureCoding: true)
-                try data.write(to: self.mapSaveUrl, options: [.atomic])
-                print("map saved")
-                
-                DispatchQueue.main.async {
-                    self.contentView.loadExperienceButton.isEnabled = true
-                    self.contentView.loadExperienceButton.backgroundColor = .systemBlue
-                }
-            } catch {
-                fatalError("Can't save map: \(error.localizedDescription)")
+                fatalError("Can't save room: \(error.localizedDescription)")
             }
         }
     }
     
-    @objc func loadExperienceButtonClick() {
+    func loadExperience() {
         let worldMap: ARWorldMap = {
-            guard let mapData = mapDataFromFile else { fatalError("Map data should already be verified to exist before Load button is enabled.") }
-            
             do {
-                guard let worldMap = try NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: mapData) else { fatalError("No ARWorldmap in archive.") }
-                print("loaded map")
-                return worldMap
+                return try self.room.getWorldMap()
             } catch {
-                fatalError("Can't unarchive ARWorldMap from file data: \(error)")
+                fatalError(error.localizedDescription)
             }
         }()
         
         let savedModels: [VirtualObject] = {
-            guard let modelsData = modelsDataFromFile else { fatalError("Models data should already be verified to exist before Load button is enabled.") }
-            
             do {
-                guard let models = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSArray.self, VirtualObject.self], from: modelsData) as? [VirtualObject] else {
-                    fatalError("No [VirtualObject] in archive.")
-                }
-                print("loaded models: \(models.count)")
-                return models
+                return try self.room.getObjects()
             } catch {
-                fatalError("Can't unarchive [VirtualObject] from file data: \(error)")
+                fatalError(error.localizedDescription)
             }
         }()
         

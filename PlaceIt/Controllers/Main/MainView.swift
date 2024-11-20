@@ -17,7 +17,6 @@ class MainView: BaseView {
     var sessionInfoView: UIVisualEffectView! // TODO: Addd fade in animation.
     var sessionInfoLabel: UILabel!
     var saveExperienceButton: UIButton!
-    var loadExperienceButton: UIButton!
     var showModelsMenuButton: UIButton!
     
     // MARK: - Layout
@@ -46,7 +45,6 @@ class MainView: BaseView {
         self.addSubview(sessionInfoView)
         
         sessionInfoLabel = UILabel()
-        sessionInfoLabel.text = "Some really long dummy text to check and see if the word wrapping is working like expected and is not breaking the UI. Adding some more text asdasdsa"
         sessionInfoLabel.font = UIFont.systemFont(ofSize: 17)
         sessionInfoLabel.textAlignment = .center
         sessionInfoLabel.numberOfLines = 3
@@ -61,16 +59,6 @@ class MainView: BaseView {
         saveExperienceButton.isHidden = true
         self.addSubview(saveExperienceButton)
         
-        loadExperienceButton = UIButton()
-        loadExperienceButton.setTitle("Load Experience", for: .normal)
-        loadExperienceButton.setTitleColor(.white, for: [])
-        loadExperienceButton.titleLabel?.adjustsFontSizeToFitWidth = true
-        loadExperienceButton.backgroundColor = .systemGray
-        loadExperienceButton.isEnabled = false
-        loadExperienceButton.layer.cornerRadius = 8
-        loadExperienceButton.isHidden = true
-        self.addSubview(loadExperienceButton)
-        
         showModelsMenuButton = UIButton()
         showModelsMenuButton.setImage(UIImage(named: "addButtonImage"), for: [])
         showModelsMenuButton.setImage(UIImage(named: "addButtonImagePressed"), for: .selected)
@@ -83,7 +71,8 @@ class MainView: BaseView {
         }
         
         snapshotThumbnailImageView.snp.makeConstraints { make in
-            make.top.left.equalTo(self.safeAreaLayoutGuide).offset(10)
+            make.top.equalTo(self.safeAreaLayoutGuide)
+            make.left.equalTo(self.safeAreaLayoutGuide).offset(10)
             make.width.equalToSuperview().multipliedBy(0.32)
             make.height.equalToSuperview().multipliedBy(0.3)
         }
@@ -100,17 +89,9 @@ class MainView: BaseView {
         
         saveExperienceButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.right.equalTo(showModelsMenuButton.snp.left)
             make.centerY.equalTo(showModelsMenuButton)
+            make.width.equalToSuperview().multipliedBy(0.5)
             make.height.equalTo(40)
-            make.width.equalToSuperview().multipliedBy(0.3)
-        }
-        
-        loadExperienceButton.snp.makeConstraints { make in
-            make.left.equalToSuperview().offset(10)
-            make.centerY.equalTo(showModelsMenuButton)
-            make.height.equalTo(40)
-            make.width.equalToSuperview().multipliedBy(0.3)
         }
         
         showModelsMenuButton.snp.makeConstraints { make in

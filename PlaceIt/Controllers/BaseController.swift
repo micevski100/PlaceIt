@@ -20,13 +20,17 @@ class BaseController<T: BaseView>: UIViewController {
     }
     
     open func autoViewDidLoad() {
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        
         contentView = T(frame: CGRect.zero)
         contentView.tag = 1
         contentView.setViewController(self)
         self.view.addSubview(contentView)
         
         contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.top.left.right.equalToSuperview()
+            constraintBottom = make.bottom.equalToSuperview().constraint
+            constraintBottom.isActive = true
         }
         
         setupViewResizerOnKeyboardShown();
