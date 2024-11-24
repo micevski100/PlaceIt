@@ -2,7 +2,7 @@
 //  ModelsMenuView.swift
 //  PlaceIt
 //
-//  Created by Aleksandar Micevski on 26.10.24.
+//  Created by Aleksandar Micevski on 22.11.24.
 //
 
 import UIKit
@@ -28,19 +28,18 @@ class ModelsMenuView: BaseView {
         
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.backgroundColor = .clear
-        collectionView.register(ModelsMenuItemCell.self,
-                                forCellWithReuseIdentifier: ModelsMenuItemCell.reuseIdentifier)
         containerView.contentView.addSubview(collectionView)
+       
     }
     
     override func setupConstraints() {
         containerView.snp.makeConstraints { make in
-            make.top.left.right.equalTo(self.safeAreaLayoutGuide)
+            make.top.left.right.equalToSuperview()
             make.bottom.equalToSuperview()
         }
         
         collectionView.snp.makeConstraints { make in
-            make.edges.equalTo(containerView)
+            make.edges.equalToSuperview()
         }
     }
     

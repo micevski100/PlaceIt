@@ -18,7 +18,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
         
-        window?.rootViewController = RoomSelectionController.factoryController()
+        let bundle = Bundle.main.url(forResource: "Models.scnassets", withExtension: nil)!
+//        window?.rootViewController = UINavigationController(rootViewController: Test(dirURL: bundle, isSectionedController: true))
+//        window?.rootViewController = RoomSelectionController.factoryController()
+        window?.rootViewController = UINavigationController(rootViewController: MainController.factoryController(Room(name: "asd", type: .bathRoom)))
         window?.makeKeyAndVisible()
     }
 

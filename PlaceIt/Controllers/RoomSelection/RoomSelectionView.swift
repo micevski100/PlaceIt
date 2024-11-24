@@ -17,8 +17,6 @@ class RoomSelectionView: BaseView {
         
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.backgroundColor = .clear
-        collectionView.register(ModelsMenuItemCell.self,
-                                forCellWithReuseIdentifier: ModelsMenuItemCell.reuseIdentifier)
         self.addSubview(collectionView)
     }
     

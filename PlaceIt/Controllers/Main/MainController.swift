@@ -14,10 +14,6 @@ import SceneKit
 /// objects for future reference.
 class MainController: BaseController<MainView> {
     
-    // MARK: - Types
-    
-    
-    
     // MARK: - Properties
     
     var room: Room!
@@ -31,13 +27,13 @@ class MainController: BaseController<MainView> {
     
     /// Holds the model selected from the menu, ready to be placed in the scene.
     /// Set when the user picks a model from the `modelsMenuController`.
-    var selectedModelToPlace: String?
+    var selectedModelToPlace: URL?
     
     /// Current state of the `modelsMenuController`.
     var menuState: MenuState = .closed
     
     /// The view controller that displays the object selection menu.
-    var modelsMenuController: ModelsMenuController!
+    var modelsMenuController: UINavigationController!
     
     /// A type which manages gesture manipulation of virtual content in the scene.
     lazy var virtualObjectInteraction = VirtualObjectInteraction(sceneView: sceneView, controller: self)
@@ -90,18 +86,22 @@ class MainController: BaseController<MainView> {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.navigationBar.tintColor = .white
-        
         sceneView.delegate = self
         session.delegate = self
         
-        modelsMenuController = ModelsMenuController()
-        modelsMenuController.delegate = self
+        
+        let bundle = Bundle.main.url(forResource: "Models.scnassets", withExtension: nil)!
+        modelsMenuController = ModelsMenuController.factoryController(dirURL: bundle,
+                                                                      isSectionedController: true,
+                                                                      delegate: self)
         
         self.contentView.showModelsMenuButton.addTarget(self, action: #selector(showModelsMenuButtonClick), for: .touchUpInside)
         self.contentView.saveExperienceButton.addTarget(self, action: #selector(saveExperienceButtonClick), for: .touchUpInside)
         
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
+        sceneView.addGestureRecognizer(tapGesture)
+        
         loadHighlightTechnique()
-        addTapGesture()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -293,7 +293,7 @@ extension MainController {
         }
     }
     
-    func loadExperience() {
+    private func loadExperience() {
         let worldMap: ARWorldMap = {
             do {
                 return try self.room.getWorldMap()
@@ -365,6 +365,21 @@ extension MainController {
         }
     }
     
+    private func addModel(withName modelURL: URL, translation: SIMD3<Float>) {
+//        guard let scene = SCNScene(named: "Models.scnassets/\(modelName).dae") else { return }
+        guard let scene = try? SCNScene(url: modelURL) else { return }
+        
+        let modelName = modelURL.lastPathComponent.replacingOccurrences(of: ".dae", with: "")
+        let virtualObject = VirtualObject(name: modelName)
+        scene.rootNode.childNodes.forEach { virtualObject.addChildNode($0) }
+        virtualObject.position = SCNVector3(translation) 
+        updateQueue.async {
+            self.sceneView.scene.rootNode.addChildNode(virtualObject)
+            self.sceneView.addOrUpdateAnchor(for: virtualObject)
+        }
+        loadedModels.append(virtualObject)
+    }
+    
     /** A helper method to return the first object that is found under the provided `gesture`s touch locations.
      Performs hit tests using the touch locations provided by gesture recognizers. By hit testing against the bounding
      boxes of the virtual objects, this function makes it more likely that a user touch will affect the object even if the
@@ -389,29 +404,65 @@ extension MainController {
         
         return nil
     }
+}
+
+// MARK: - Models Menu
+
+extension MainController: ModelsMenuControllerDelegate {
+    /// Attaches the `modelsMenuController` as a child controller to the `MainController`.
+    private func attachModelsMenuController() {
+        modelsMenuController.view.frame = CGRect(
+            x: self.view.width,
+            y: 0,
+            width: self.view.width * 0.5,
+            height: self.view.height
+        )
+        addChild(modelsMenuController)
+        self.view.addSubview(modelsMenuController.view)
+        modelsMenuController.didMove(toParent: self)
+    }
     
-    private func addTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
-        sceneView.addGestureRecognizer(tapGesture)
+    /// Shows the `modelsMenuController` when the user taps on the `showObjectsMenuButton`.
+    private func showModelsMenu() {
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
+        menuState = .opened
+        UIView.animate(
+            withDuration: 0.5, delay: 0,
+            usingSpringWithDamping: 0.8,
+            initialSpringVelocity: 0,
+            options: .curveEaseInOut
+        ) {
+            self.contentView.showModelsMenuButton.alpha = 0
+            self.modelsMenuController.view.frame.origin.x -= self.modelsMenuController.view.width
+        }
+    }
+    
+    /// Hides the `modelsMenuController` when the user taps on the scene.
+    private func hideModelsMenu() {
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+        menuState = .closed
+        UIView.animate(
+            withDuration: 0.5,
+            delay: 0,
+            usingSpringWithDamping: 0.8,
+            initialSpringVelocity: 0,
+            options: .curveEaseInOut
+        ) {
+            self.contentView.showModelsMenuButton.alpha = 1
+            self.modelsMenuController.view.frame.origin.x += self.modelsMenuController.view.width
+        }
+    }
+    
+    func didSelectModel(modelName: String?) {
+//        selectedModelToPlace = modelName
+    }
+    
+    func didSelectModel(modelUrl: URL?) {
+        selectedModelToPlace = modelUrl
     }
 }
 
-extension MainController {
-    private func addModel(withName modelName: String, translation: SIMD3<Float>) {
-        guard let scene = SCNScene(named: "Models.scnassets/\(modelName).dae") else { return }
-        
-        let virtualObject = VirtualObject(name: modelName)
-        scene.rootNode.childNodes.forEach { virtualObject.addChildNode($0) }
-        virtualObject.position = SCNVector3(translation)
-        updateQueue.async {
-            self.sceneView.scene.rootNode.addChildNode(virtualObject)
-            self.sceneView.addOrUpdateAnchor(for: virtualObject)
-        }
-        loadedModels.append(virtualObject)
-        
-        print("NUMBER OF MODELS: \(loadedModels.count)")
-    }
-}
+// MARK: - Highligh Technique
 
 extension MainController {
     /// Loads the technique that is used to achieve a highlight effect around selected `VirtualObject`.
@@ -437,57 +488,5 @@ extension MainController {
         else {
           fatalError("This shouldn't be happening! Technique file has been deleted.")
         }
-    }
-}
-
-// MARK: - Models Menu
-
-extension MainController {
-    /// Attaches the `modelsMenuController` as a child controller to the `MainController`.
-    private func attachModelsMenuController() {
-        modelsMenuController.view.frame = CGRect(
-            x: self.view.width,
-            y: 0,
-            width: self.view.width * 0.5,
-            height: self.view.height
-        )
-        addChild(modelsMenuController)
-        self.view.addSubview(modelsMenuController.view)
-        modelsMenuController.didMove(toParent: self)
-    }
-    
-    /// Shows the `modelsMenuController` when the user taps on the `showObjectsMenuButton`.
-    private func showModelsMenu() {
-        menuState = .opened
-        UIView.animate(
-            withDuration: 0.5, delay: 0,
-            usingSpringWithDamping: 0.8,
-            initialSpringVelocity: 0,
-            options: .curveEaseInOut
-        ) {
-            self.contentView.showModelsMenuButton.alpha = 0
-            self.modelsMenuController.view.frame.origin.x -= self.modelsMenuController.view.width
-        }
-    }
-    
-    /// Hides the `modelsMenuController` when the user taps on the scene.
-    private func hideModelsMenu() {
-        menuState = .closed
-        UIView.animate(
-            withDuration: 0.5,
-            delay: 0,
-            usingSpringWithDamping: 0.8,
-            initialSpringVelocity: 0,
-            options: .curveEaseInOut
-        ) {
-            self.contentView.showModelsMenuButton.alpha = 1
-            self.modelsMenuController.view.frame.origin.x += self.modelsMenuController.view.width
-        }
-    }
-}
-
-extension MainController: ModelsMenuControllerDelegate {
-    func didSelectModel(modelName: String?) {
-        selectedModelToPlace = modelName
     }
 }

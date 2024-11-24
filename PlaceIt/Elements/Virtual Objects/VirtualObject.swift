@@ -43,9 +43,9 @@ class VirtualObject: SCNNode {
         self.id = UUID()
         super.init()
         
-        let geometry = SCNSphere(radius: 0.05) // Example geometry
-        self.geometry = geometry
-        self.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+//        let geometry = SCNSphere(radius: 0.05) // Example geometry
+//        self.geometry = geometry
+//        self.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
     }
     
     required init?(coder aDecoder: NSCoder) {
