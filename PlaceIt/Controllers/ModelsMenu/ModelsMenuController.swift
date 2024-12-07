@@ -113,7 +113,7 @@ extension ModelsMenuController: UICollectionViewDataSource, UICollectionViewDele
 // MARK: - Helpers
 
 extension ModelsMenuController {
-    func getThumbImage(at url: URL) -> UIImage? {
+    private func getThumbImage(at url: URL) -> UIImage? {
         let supportedExtensions = ["jpg", "jpeg", "png"]
         let imageUrl: URL? = FileManager()
             .enumerator(at: url,
@@ -130,7 +130,7 @@ extension ModelsMenuController {
         return UIImage(contentsOfFile: imageUrl.path)
     }
     
-    func getModelUrl(at url: URL) -> URL? {
+    private func getModelUrl(at url: URL) -> URL? {
         return FileManager()
             .enumerator(at: url,
                         includingPropertiesForKeys: [],

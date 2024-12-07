@@ -14,7 +14,7 @@ class CreateRoomController: BaseController<CreateRoomView> {
         self.title = "Add Room"
         self.navigationController?.navigationBar.tintColor = .black
         
-//        self.contentView.continueButton.addTarget(self, action: #selector(continueButtonClick), for: .touchUpInside)
+        self.contentView.continueButton.addTarget(self, action: #selector(continueButtonClick), for: .touchUpInside)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -22,16 +22,16 @@ class CreateRoomController: BaseController<CreateRoomView> {
         self.navigationController?.navigationBar.prefersLargeTitles = true
     }
     
-//    @objc func continueButtonClick() {
-//        guard let roomName = self.contentView.roomNameTextField.text else { return }
-//        guard let roomType = self.contentView.selectedType else { return }
-//        
-//        let room = Room(name: roomName, type: roomType)
-//        let mainController = MainController.factoryController(room) as UIViewController
-//        
-//        let roomSelectionController: UIViewController = self.navigationController!.viewControllers[0]
-//        self.navigationController?.setViewControllers([roomSelectionController, mainController], animated: true)
-//    }
+    @objc func continueButtonClick() {
+        guard let roomName = self.contentView.roomNameTextField.text else { return }
+        guard let roomType = self.contentView.selectedType else { return }
+        
+        let room = Room(name: roomName, type: roomType)
+        let mainController = MainController.factoryController(room) as UIViewController
+        
+        let roomSelectionController: UIViewController = self.navigationController!.viewControllers[0]
+        self.navigationController?.setViewControllers([roomSelectionController, mainController], animated: true)
+    }
 }
 
 

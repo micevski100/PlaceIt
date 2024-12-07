@@ -451,6 +451,7 @@ extension MainController: ModelsMenuControllerDelegate {
     
     /// Hides the `modelsMenuController` when the user taps on the scene.
     private func hideModelsMenu() {
+        self.modelsMenuController.popViewController(animated: false)
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         menuState = .closed
         UIView.animate(
