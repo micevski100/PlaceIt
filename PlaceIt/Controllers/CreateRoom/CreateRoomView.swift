@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 
+
 class CreateRoomView: BaseView {
     
     var isDropDownOpen: Bool = false {
@@ -172,6 +173,11 @@ class CreateRoomView: BaseView {
     
     @objc func dropdownLabelTapped() {
         isDropDownOpen.toggle()
+    }
+    
+    @objc func didTap() {
+        isDropDownOpen = false
+        roomNameTextField.resignFirstResponder()
     }
 }
 

@@ -11,7 +11,6 @@
 		EE19B70A2CECFCC900906F0A /* UIDropdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE19B7092CECFCC900906F0A /* UIDropdown.swift */; };
 		EE1FE5F12CCAC2FF00D30110 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1FE5F02CCAC2FF00D30110 /* AppDelegate.swift */; };
 		EE1FE5F32CCAC2FF00D30110 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */; };
-		EE1FE5F82CCAC2FF00D30110 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = EE1FE5F72CCAC2FF00D30110 /* Base */; };
 		EE1FE5FD2CCAC30000D30110 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = EE1FE5FC2CCAC30000D30110 /* Base */; };
 		EE3538E72CD6407100EBBF62 /* ThresholdPanGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3538E62CD6407100EBBF62 /* ThresholdPanGesture.swift */; };
 		EE3538E92CD6455300EBBF62 /* VirtualObjectInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3538E82CD6455300EBBF62 /* VirtualObjectInteraction.swift */; };
@@ -50,7 +49,6 @@
 		EE1FE5ED2CCAC2FF00D30110 /* PlaceIt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlaceIt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE1FE5F02CCAC2FF00D30110 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		EE1FE5F72CCAC2FF00D30110 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		EE1FE5FC2CCAC30000D30110 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		EE1FE5FE2CCAC30000D30110 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EE3538E62CD6407100EBBF62 /* ThresholdPanGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThresholdPanGesture.swift; sourceTree = "<group>"; };
@@ -233,7 +231,6 @@
 				EE8F9D6F2CD4104C00CB0C2B /* scene_techniques */,
 				EEC039932CCC1ED5003E0589 /* Assets.xcassets */,
 				EE1FE5FB2CCAC30000D30110 /* LaunchScreen.storyboard */,
-				EE1FE5F62CCAC2FF00D30110 /* Main.storyboard */,
 				EEE920202CF0DB66001FA4BF /* Models.scnassets */,
 			);
 			path = Resources;
@@ -345,7 +342,6 @@
 				EE1FE5FD2CCAC30000D30110 /* Base in Resources */,
 				EEC039942CCC1ED5003E0589 /* Assets.xcassets in Resources */,
 				EE8F9D712CD4104C00CB0C2B /* RenderOutlineTechnique.plist in Resources */,
-				EE1FE5F82CCAC2FF00D30110 /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,14 +427,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		EE1FE5F62CCAC2FF00D30110 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				EE1FE5F72CCAC2FF00D30110 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		EE1FE5FB2CCAC30000D30110 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -583,7 +571,6 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "PlaceIt needs access to the camera in order to work properly.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
@@ -614,7 +601,6 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "PlaceIt needs access to the camera in order to work properly.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
