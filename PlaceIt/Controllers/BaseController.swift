@@ -80,4 +80,3 @@ class BaseController<T: BaseView>: UIViewController {
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 }
-

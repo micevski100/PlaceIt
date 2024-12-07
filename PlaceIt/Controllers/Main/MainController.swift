@@ -267,6 +267,7 @@ extension MainController: ARSessionDelegate {
 }
 
 // MARK: - Button Actions
+
 extension MainController {
     @objc func showModelsMenuButtonClick() {
         showModelsMenu()
@@ -346,7 +347,7 @@ extension MainController {
                 guard let raycastResult = session.raycast(raycastQuery).first else { return }
                 
                 let translation = raycastResult.worldTransform.translation
-                addModel(withName: selectedModelToPlace, translation: translation)
+                addVirtualObject(withUrl: selectedModelToPlace, at: SCNVector3(translation))
                 
                 self.selectedModelToPlace = nil
             }
@@ -354,30 +355,41 @@ extension MainController {
             // Case 1, 2
             hideModelsMenu()
         } else {
-            guard let object = objectInteracting(with: gesture, in: sceneView) else { return }
-            
-            if (object != virtualObjectInteraction.trackedObject) {
-                virtualObjectInteraction.trackedObject?.toggleHighlight()
-                object.toggleHighlight()
-                
-                virtualObjectInteraction.trackedObject = object
-            }
+            virtualObjectInteraction.trackedObject = objectInteracting(with: gesture, in: sceneView)
+            virtualObjectInteraction.didTap(location: gesture.location(in: sceneView))
         }
     }
     
-    private func addModel(withName modelURL: URL, translation: SIMD3<Float>) {
-//        guard let scene = SCNScene(named: "Models.scnassets/\(modelName).dae") else { return }
-        guard let scene = try? SCNScene(url: modelURL) else { return }
-        
-        let modelName = modelURL.lastPathComponent.replacingOccurrences(of: ".dae", with: "")
-        let virtualObject = VirtualObject(name: modelName)
-        scene.rootNode.childNodes.forEach { virtualObject.addChildNode($0) }
-        virtualObject.position = SCNVector3(translation) 
-        updateQueue.async {
-            self.sceneView.scene.rootNode.addChildNode(virtualObject)
-            self.sceneView.addOrUpdateAnchor(for: virtualObject)
+    public func addVirtualObject(withUrl modelURL: URL, at position: SCNVector3, completion: ((VirtualObject?) -> Void)? = nil) {
+        guard let scene = try? SCNScene(url: modelURL) else {
+            completion?(nil)
+            return
         }
-        loadedModels.append(virtualObject)
+        
+        let virtualObject = VirtualObject(url: modelURL)
+        let rootNode = SCNNode()
+        scene.rootNode.childNodes.forEach { rootNode.addChildNode($0) }
+        virtualObject.addChildNode(rootNode)
+        virtualObject.position = position
+        placeVirtualObject(object: virtualObject)
+    }
+    
+    public func placeVirtualObject(object: VirtualObject, completion: ((VirtualObject?) -> Void)? = nil) {
+        updateQueue.async {
+            self.sceneView.scene.rootNode.addChildNode(object)
+            self.sceneView.addOrUpdateAnchor(for: object)
+            
+            DispatchQueue.main.async {
+                completion?(object)
+            }
+        }
+        loadedModels.append(object)
+    }
+    
+    func removeVirtualObject(_ object: VirtualObject) {
+        guard let objectIndex = loadedModels.firstIndex(of: object) else { return }
+        object.removeFromParentNode()
+        loadedModels.remove(at: objectIndex)
     }
     
     /** A helper method to return the first object that is found under the provided `gesture`s touch locations.
@@ -451,10 +463,6 @@ extension MainController: ModelsMenuControllerDelegate {
             self.contentView.showModelsMenuButton.alpha = 1
             self.modelsMenuController.view.frame.origin.x += self.modelsMenuController.view.width
         }
-    }
-    
-    func didSelectModel(modelName: String?) {
-//        selectedModelToPlace = modelName
     }
     
     func didSelectModel(modelUrl: URL?) {

@@ -12,9 +12,13 @@ import SceneKit
 class VirtualObject: SCNNode {
     
     
-    let id: UUID!
+    let id: UUID
     
-    var modelName: String
+    var modelName: String {
+        return referenceURL?.lastPathComponent.replacingOccurrences(of: ".dae", with: " ") ?? ""
+    }
+    
+    var referenceURL: URL?
     
     /// The object's corresponding ARAnchor.
     var anchor: ARAnchor?
@@ -38,8 +42,15 @@ class VirtualObject: SCNNode {
     
     
     // MARK: - Serialization
-    required init(name: String) {
-        self.modelName = name
+    
+    override init() {
+        self.id = UUID()
+        self.referenceURL = nil
+        super.init()
+    }
+    
+    required init(url: URL) {
+        self.referenceURL = url
         self.id = UUID()
         super.init()
         
@@ -50,11 +61,11 @@ class VirtualObject: SCNNode {
     
     required init?(coder aDecoder: NSCoder) {
         guard let id = aDecoder.decodeObject(of: [NSUUID.self], forKey: "id") as? UUID else { return nil}
-        guard let modelName = aDecoder.decodeObject(of: [NSString.self], forKey: "modelName") as? String else { return nil }
+        guard let referenceURL = aDecoder.decodeObject(of: [NSURL.self], forKey: "referenceURL") as? URL else { return nil }
         guard let anchor = aDecoder.decodeObject(of: [ARAnchor.self], forKey: "anchor") as? ARAnchor else { return nil }
         
         self.id = id
-        self.modelName = modelName
+        self.referenceURL = referenceURL
         self.anchor = anchor
         super.init(coder: aDecoder)
     }
@@ -62,12 +73,26 @@ class VirtualObject: SCNNode {
     override func encode(with aCoder: NSCoder) {
         super.encode(with: aCoder)
         aCoder.encode(id, forKey: "id")
-        aCoder.encode(modelName, forKey: "modelName")
+        aCoder.encode(referenceURL, forKey: "referenceURL")
         aCoder.encode(anchor, forKey: "anchor")
     }
     
     override class var supportsSecureCoding: Bool {
         return true
+    }
+    
+    override func clone() -> Self {
+        let clone = super.clone()
+        if let geometry = self.geometry {
+            let sources = geometry.sources
+            let elements = geometry.elements
+            
+            let copiedGeometry = SCNGeometry(sources: sources, elements: elements)
+            copiedGeometry.materials = geometry.materials.map { $0.copy() as! SCNMaterial }
+            
+            clone.geometry = copiedGeometry
+        }
+        return clone
     }
 }
 

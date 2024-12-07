@@ -42,4 +42,3 @@ open class BaseView: UIView {
         return self.init(frame: CGRect.zero)
     }
 }
-
