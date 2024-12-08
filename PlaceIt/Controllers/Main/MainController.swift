@@ -340,23 +340,21 @@ extension MainController {
     /// 3. Selects an already placed model for interaction if tapped.
     @objc func didTap(_ gesture: UIGestureRecognizer) {
         let touchLocation = gesture.location(in: sceneView)
-        if menuState == .opened {
-            // Case 1
-            if let selectedModelToPlace = selectedModelToPlace {
-                guard let raycastQuery = sceneView.raycastQuery(from: touchLocation, allowing: .existingPlaneGeometry, alignment: .any) else { return }
-                guard let raycastResult = session.raycast(raycastQuery).first else { return }
-                
-                let translation = raycastResult.worldTransform.translation
-                addVirtualObject(withUrl: selectedModelToPlace, at: SCNVector3(translation))
-                
-                self.selectedModelToPlace = nil
-            }
+        switch menuState {
+        case .opened:
+            defer { hideModelsMenu() }
+            guard let selectedModelToPlace = selectedModelToPlace else { return }
+            guard let raycastQuery = sceneView.raycastQuery(from: touchLocation, allowing: .existingPlaneGeometry, alignment: .any) else { return }
+            guard let raycastResult = sceneView.session.raycast(raycastQuery).first else { return }
             
-            // Case 1, 2
-            hideModelsMenu()
-        } else {
+            let translation = raycastResult.worldTransform.translation
+            let objectPosition = SCNVector3(translation)
+            
+            addVirtualObject(withUrl: selectedModelToPlace, at: objectPosition)
+            self.selectedModelToPlace = nil
+        case .closed:
             virtualObjectInteraction.trackedObject = objectInteracting(with: gesture, in: sceneView)
-            virtualObjectInteraction.didTap(location: gesture.location(in: sceneView))
+            virtualObjectInteraction.didTap(location: touchLocation)
         }
     }
     

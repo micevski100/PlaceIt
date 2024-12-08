@@ -66,6 +66,33 @@ class VirtualObjectInteraction: NSObject {
         let rotationGesture = UIRotationGestureRecognizer(target: self, action: #selector(didRotate(_:)))
         rotationGesture.delegate = self
         sceneView.addGestureRecognizer(rotationGesture)
+        
+        loadHighlightTechnique()
+    }
+    
+    /// Loads the technique that is used to achieve a highlight effect around selected `VirtualObject`.
+    private func loadHighlightTechnique() {
+        if let fileUrl = Bundle.main.url(forResource: "RenderOutlineTechnique", withExtension: "plist"), let data = try? Data(contentsOf: fileUrl) {
+          if var result = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] { // [String: Any] which ever it is
+            
+            // Update the size and scale factor in the original technique file
+            // to whichever size and scale factor the current device is so that
+            // we avoid crazy aliasing
+            let nativePoints = UIScreen.main.bounds
+            let nativeScale = UIScreen.main.nativeScale
+            result[keyPath: "targets.MASK.size"] = "\(nativePoints.width)x\(nativePoints.height)"
+            result[keyPath: "targets.MASK.scaleFactor"] = nativeScale
+            
+            guard let technique = SCNTechnique(dictionary: result) else {
+              fatalError("This shouldn't be happening.")
+            }
+
+            sceneView.technique = technique
+          }
+        }
+        else {
+          fatalError("This shouldn't be happening! Technique file has been deleted.")
+        }
     }
 }
 
@@ -153,7 +180,7 @@ extension VirtualObjectInteraction: UIGestureRecognizerDelegate {
 // MARK: - Update Object Position
 
 extension VirtualObjectInteraction {
-    func updatedTrackingPosition(for object: VirtualObject, from gesture: UIPanGestureRecognizer) -> CGPoint {
+    private func updatedTrackingPosition(for object: VirtualObject, from gesture: UIPanGestureRecognizer) -> CGPoint {
         let translation = gesture.translation(in: sceneView)
         let currentPosition = currentTrackingPosition ?? CGPoint(sceneView.projectPoint(object.position))
         let updatedPosition = CGPoint(x: currentPosition.x + translation.x, y: currentPosition.y + translation.y)
@@ -162,7 +189,7 @@ extension VirtualObjectInteraction {
         return updatedPosition
     }
     
-    func translate (_ object: VirtualObject, basedOn screenPos: CGPoint) {
+    private func translate (_ object: VirtualObject, basedOn screenPos: CGPoint) {
         // Update the object by using a one-time position request.
         guard let query = sceneView.raycastQuery(from: screenPos, allowing: .estimatedPlane, alignment: object.allowedAlignment) else { return }
         guard let result = sceneView.session.raycast(query).first else { return }
