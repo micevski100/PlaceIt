@@ -139,6 +139,7 @@ extension MainController: ARSCNViewDelegate {
         if let planeAnchor = anchor as? ARPlaneAnchor {
             guard planeAnchor.classification == .floor else { return }
             
+            print("CREATING PLANE")
             // When a new plane is detected we create a new SceneKit plane to visualize it in 3D
             updateQueue.async {
                 let plane = Plane(with: planeAnchor)
@@ -158,6 +159,7 @@ extension MainController: ARSCNViewDelegate {
         // Update Plane Geometry to match updated anchor
         DispatchQueue.main.async {
             if let plane = self.planes[anchor.identifier] {
+                print("UPDATING PLANE")
                 plane.update(with: anchor as! ARPlaneAnchor)
             }
         }
@@ -369,6 +371,8 @@ extension MainController {
         scene.rootNode.childNodes.forEach { rootNode.addChildNode($0) }
         virtualObject.addChildNode(rootNode)
         virtualObject.position = position
+        let texture = ModelsManager.shared.getTextures(for: virtualObject)[0]
+        virtualObject.applyTexture(texture)
         placeVirtualObject(object: virtualObject)
     }
     

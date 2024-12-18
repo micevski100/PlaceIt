@@ -4,16 +4,16 @@
   <contributor>
    <authoring_tool>SceneKit Collada Exporter v1.0</authoring_tool>
   </contributor>
-  <created>2024-11-22T20:47:16Z</created>
-  <modified>2024-11-22T20:47:16Z</modified>
+  <created>2024-12-16T19:01:56Z</created>
+  <modified>2024-12-16T19:01:56Z</modified>
   <unit meter="1.000000"/>
   <up_axis>Y_UP</up_axis>
  </asset>
  <library_materials>
-  <material id="Wood-material" name="Wood">
+  <material id="Wood-material" name="Base">
    <instance_effect url="#effect_Wood-material"/>
   </material>
-  <material id="iron-material" name="iron">
+  <material id="iron-material" name="Iron">
    <instance_effect url="#effect_iron-material"/>
   </material>
  </library_materials>

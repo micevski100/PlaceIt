@@ -18,6 +18,8 @@ class VirtualObject: SCNNode {
         return referenceURL?.lastPathComponent.replacingOccurrences(of: ".dae", with: " ") ?? ""
     }
     
+    var appliedTexture: VirtualObjectTexture?
+    
     var referenceURL: URL?
     
     /// The object's corresponding ARAnchor.
@@ -63,10 +65,12 @@ class VirtualObject: SCNNode {
         guard let id = aDecoder.decodeObject(of: [NSUUID.self], forKey: "id") as? UUID else { return nil}
         guard let referenceURL = aDecoder.decodeObject(of: [NSURL.self], forKey: "referenceURL") as? URL else { return nil }
         guard let anchor = aDecoder.decodeObject(of: [ARAnchor.self], forKey: "anchor") as? ARAnchor else { return nil }
+        guard let appliedTexture = aDecoder.decodeObject(of: [VirtualObjectTexture.self], forKey: "appliedTexture") as? VirtualObjectTexture else { return nil }
         
         self.id = id
         self.referenceURL = referenceURL
         self.anchor = anchor
+        self.appliedTexture = appliedTexture
         super.init(coder: aDecoder)
     }
     
@@ -75,6 +79,7 @@ class VirtualObject: SCNNode {
         aCoder.encode(id, forKey: "id")
         aCoder.encode(referenceURL, forKey: "referenceURL")
         aCoder.encode(anchor, forKey: "anchor")
+        aCoder.encode(appliedTexture, forKey: "appliedTexture")
     }
     
     override class var supportsSecureCoding: Bool {
@@ -83,6 +88,8 @@ class VirtualObject: SCNNode {
     
     override func clone() -> Self {
         let clone = super.clone()
+        clone.referenceURL = self.referenceURL
+        clone.appliedTexture = self.appliedTexture!.copy() as? VirtualObjectTexture
         if let geometry = self.geometry {
             let sources = geometry.sources
             let elements = geometry.elements
@@ -121,6 +128,39 @@ extension VirtualObject {
             childNodes.first!.setCategoryBitMaskForAllHierarchy(highlightMaskValue)
         } else {
             fatalError("Unsopported category bit mask value")
+        }
+    }
+}
+
+extension VirtualObject {
+    /// Applies textures from a `VirtualObjectTexture` to the object and its child nodes.
+    func applyTexture(_ texture: VirtualObjectTexture) {
+        self.appliedTexture = texture
+        applyTexture(to: self, using: texture)
+    }
+    
+    /// Recursively applies textures to a node and its child.
+    /// Matches textures to materials using their `name` property.
+    private func applyTexture(to node: SCNNode, using texture: VirtualObjectTexture) {
+        node.enumerateChildNodes { child, _ in
+            child.geometry?.materials.forEach { material in
+                guard let materialName = material.name else {
+                    print("Warning: Material in node \(child.name ?? "Unknown") has no name.")
+                    return
+                }
+                
+                guard let nodeTexture = texture.nodeTextures[materialName] else {
+                    print("Warning: No texture found for material name '\(materialName)' in node \(child.name ?? "Unknown").")
+                    return
+                }
+                
+                material.diffuse.contents = nodeTexture.diffuse ?? material.diffuse.contents
+                material.normal.contents = nodeTexture.normal ?? material.normal.contents
+                material.roughness.contents = nodeTexture.roughness ?? material.roughness.contents
+                material.metalness.contents = nodeTexture.metalness ?? material.metalness.contents
+            }
+            
+            applyTexture(to: child, using: texture)
         }
     }
 }

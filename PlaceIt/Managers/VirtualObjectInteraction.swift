@@ -41,6 +41,7 @@ class VirtualObjectInteraction: NSObject {
                 z: trackedObject.worldPosition.z)
             let panelLocalPosition = trackedObject.convertPosition(panelWorldPosition, from: nil)
             
+            actionPanel.setup(trackedObject.appliedTexture!, ModelsManager.shared.getTextures(for: trackedObject))
             actionPanel.position = panelLocalPosition
             trackedObject.addChildNode(actionPanel)
             actionPanel.addAppearAnimation(from: panelLocalPosition)
@@ -144,7 +145,7 @@ extension VirtualObjectInteraction {
         for result in hitResults {
             if let nodeName = result.node.name {
                 switch nodeName {
-                case "0":
+                case "copy":
                     let objectWidth = trackedObject.boundingBox.max.x - trackedObject.boundingBox.min.x
                     let offset: Float = objectWidth - 0.2
                     let position = SCNVector3(trackedObject.position.x + offset, trackedObject.position.y, trackedObject.position.z)
@@ -157,10 +158,19 @@ extension VirtualObjectInteraction {
                         self.trackedObject = object
                     }
                     break
-                case "1":
+                case "delete":
                     controller.removeVirtualObject(trackedObject)
                     self.trackedObject = nil
-                    default:
+                case "texture":
+                    let newController = EditModelController.factoryController(trackedObject, self)
+                    if let sheet = newController.sheetPresentationController {
+                        sheet.detents = [.custom { _ in return UIScreen.main.bounds.height * 0.3 }]
+                        sheet.prefersGrabberVisible = true
+                    }
+                    print("PRESENTING")
+                    controller.present(newController, animated: true)
+                    break
+                default:
                     break
                 }
             }
@@ -195,5 +205,12 @@ extension VirtualObjectInteraction {
         guard let result = sceneView.session.raycast(query).first else { return }
         
         object.simdWorldTransform = result.worldTransform
+    }
+}
+
+extension VirtualObjectInteraction: EditModelDelegate {
+    func didSelectTexture(_ texture: VirtualObjectTexture) {
+        guard let trackedObject else { return }
+        trackedObject.applyTexture(texture)
     }
 }

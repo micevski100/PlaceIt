@@ -41,10 +41,6 @@ class CreateRoomView: BaseView {
     override func setupViews() {
         self.backgroundColor = UIColor.init(hex: 0xF8F9FC)
         
-        self.isUserInteractionEnabled = true
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap))
-        self.addGestureRecognizer(tapGesture)
-        
         roomNameLabel = UILabel()
         roomNameLabel.text = "Room Name"
         roomNameLabel.font = UIFont.boldSystemFont(ofSize: 18)
@@ -177,11 +173,6 @@ class CreateRoomView: BaseView {
     
     @objc func dropdownLabelTapped() {
         isDropDownOpen.toggle()
-    }
-    
-    @objc func didTap() {
-        isDropDownOpen = false
-        roomNameTextField.resignFirstResponder()
     }
 }
 

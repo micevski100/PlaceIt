@@ -23,7 +23,7 @@ class VirtualObjectActionPanel: SCNNode {
         self.actions = actions
         super.init()
         
-        setup(with: actions)
+//        setup(with: actions)
     }
     
     required init?(coder: NSCoder) {
@@ -45,6 +45,66 @@ class VirtualObjectActionPanel: SCNNode {
         UIGraphicsEndImageContext()
         
         return image
+    }
+    
+    func setup(_ selectedTexture: VirtualObjectTexture, _ availableTextures: [VirtualObjectTexture]) {
+        self.childNodes.reversed().forEach { node in
+            node.removeFromParentNode()
+        }
+        
+        let n = CGFloat(3) // number of actions
+        let padding = 0.03
+        let pixelsPerUnit: CGFloat = 500
+        
+        let btnWidth = 0.08
+        let btnHeight = 0.08
+        
+        let containerWidth = n * btnWidth + (n + 1) * padding
+        let containerHeight = btnHeight + 2 * padding
+        
+        let imageWidth = containerWidth * pixelsPerUnit
+        let imageHeight = containerHeight * pixelsPerUnit
+        
+        guard let blurredImage = generateBlurredImage(size: CGSize(width: imageWidth, height: imageHeight), style: .light) else { return }
+        
+        let containerGeometry = SCNPlane(width: containerWidth, height: containerHeight)
+        containerGeometry.firstMaterial?.diffuse.contents = blurredImage
+        containerGeometry.cornerRadius = containerHeight / 2
+        self.geometry = containerGeometry
+        
+        let actionMaterials: [String: Any] = [
+            "texture": selectedTexture,
+            "copy": UIImage(systemName: "document.on.document.fill")!,
+            "delete": UIImage(systemName: "trash.fill")!
+        ]
+        
+        for (i, (key, value)) in actionMaterials.enumerated() {
+            let xLeft = (-containerWidth / 2) + (btnWidth / 2)
+            let x = xLeft + CGFloat(i + 1) * padding + CGFloat(i) * btnWidth
+            
+            let btnGeometry = SCNPlane(width: btnWidth, height: btnHeight)
+            btnGeometry.cornerRadius = btnHeight / 2
+            if key == "texture" {
+                let texture = value as! VirtualObjectTexture
+                if let x = texture.nodeTextures["Base"] {
+                    btnGeometry.firstMaterial?.diffuse.contents = x.diffuse ?? btnGeometry.firstMaterial?.diffuse.contents
+                    btnGeometry.firstMaterial?.normal.contents = x.normal ?? btnGeometry.firstMaterial?.normal.contents
+                    btnGeometry.firstMaterial?.roughness.contents = x.roughness ?? btnGeometry.firstMaterial?.roughness.contents
+                    btnGeometry.firstMaterial?.metalness.contents = x.metalness ?? btnGeometry.firstMaterial?.metalness.contents
+                }
+                
+            } else {
+                btnGeometry.firstMaterial?.diffuse.contents = value
+            }
+            
+            let btnNode = SCNNode(geometry: btnGeometry)
+            btnNode.name = key
+            btnNode.position = SCNVector3(x, 0, 0.01)
+            self.addChildNode(btnNode)
+        }
+        
+        let billboardConstraint = SCNBillboardConstraint()
+        self.constraints = [billboardConstraint]
     }
     
     private func setup(with actions: [Any]) {

@@ -21,6 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.backgroundColor = UIColor.init(hex: 0xF8F9FC)
         window?.rootViewController = RoomSelectionController.factoryController()
+//        window?.rootViewController = MainController.factoryController(Room(name: "asd", type: .bathRoom))
         window?.makeKeyAndVisible()
     }
 
