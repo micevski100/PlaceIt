@@ -24,8 +24,8 @@ class VirtualObjectInteraction: NSObject {
     var trackedObject: VirtualObject? {
         didSet {
             guard oldValue != trackedObject else { return }
-            oldValue?.toggleHighlight()
-            trackedObject?.toggleHighlight()
+            toggleHighlight(for: oldValue)
+            toggleHighlight(for: trackedObject)
             
             actionPanel.removeFromParentNode()
             actionPanel.position = SCNVector3Zero
@@ -68,31 +68,6 @@ class VirtualObjectInteraction: NSObject {
         sceneView.addGestureRecognizer(rotationGesture)
         
         loadHighlightTechnique()
-    }
-    
-    /// Loads the technique that is used to achieve a highlight effect around selected `VirtualObject`.
-    private func loadHighlightTechnique() {
-        if let fileUrl = Bundle.main.url(forResource: "RenderOutlineTechnique", withExtension: "plist"), let data = try? Data(contentsOf: fileUrl) {
-          if var result = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] { // [String: Any] which ever it is
-            
-            // Update the size and scale factor in the original technique file
-            // to whichever size and scale factor the current device is so that
-            // we avoid crazy aliasing
-            let nativePoints = UIScreen.main.bounds
-            let nativeScale = UIScreen.main.nativeScale
-            result[keyPath: "targets.MASK.size"] = "\(nativePoints.width)x\(nativePoints.height)"
-            result[keyPath: "targets.MASK.scaleFactor"] = nativeScale
-            
-            guard let technique = SCNTechnique(dictionary: result) else {
-              fatalError("This shouldn't be happening.")
-            }
-
-            sceneView.technique = technique
-          }
-        }
-        else {
-          fatalError("This shouldn't be happening! Technique file has been deleted.")
-        }
     }
 }
 
@@ -195,5 +170,52 @@ extension VirtualObjectInteraction {
         guard let result = sceneView.session.raycast(query).first else { return }
         
         object.simdWorldTransform = result.worldTransform
+    }
+}
+
+// MARK: - Highlight Technique
+
+extension VirtualObjectInteraction {
+    /// Highlights`VirtualObject` that's ready for interaction.
+    func toggleHighlight(for object: VirtualObject?) {
+        guard let object = object else { return }
+        
+        let highlightMaskValue = 2
+        let normalMaskValue = 1
+        
+        if object.childNodes.first!.categoryBitMask == highlightMaskValue {
+            // unhighlight
+            object.childNodes.first!.setCategoryBitMaskForAllHierarchy(normalMaskValue)
+        } else if object.childNodes.first!.categoryBitMask == normalMaskValue {
+            // highlight
+            object.childNodes.first!.setCategoryBitMaskForAllHierarchy(highlightMaskValue)
+        } else {
+            fatalError("Unsopported category bit mask value")
+        }
+    }
+    
+    /// Loads the technique that is used to achieve a highlight effect around selected `VirtualObject`.
+    private func loadHighlightTechnique() {
+        if let fileUrl = Bundle.main.url(forResource: "RenderOutlineTechnique", withExtension: "plist"), let data = try? Data(contentsOf: fileUrl) {
+          if var result = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] { // [String: Any] which ever it is
+            
+            // Update the size and scale factor in the original technique file
+            // to whichever size and scale factor the current device is so that
+            // we avoid crazy aliasing
+            let nativePoints = UIScreen.main.bounds
+            let nativeScale = UIScreen.main.nativeScale
+            result[keyPath: "targets.MASK.size"] = "\(nativePoints.width)x\(nativePoints.height)"
+            result[keyPath: "targets.MASK.scaleFactor"] = nativeScale
+            
+            guard let technique = SCNTechnique(dictionary: result) else {
+              fatalError("This shouldn't be happening.")
+            }
+
+            sceneView.technique = technique
+          }
+        }
+        else {
+          fatalError("This shouldn't be happening! Technique file has been deleted.")
+        }
     }
 }

@@ -43,7 +43,7 @@ class CreateRoomView: BaseView {
         
         self.isUserInteractionEnabled = true
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap))
-        self.addGestureRecognizer(tapGesture)
+//        self.addGestureRecognizer(tapGesture)
         
         roomNameLabel = UILabel()
         roomNameLabel.text = "Room Name"

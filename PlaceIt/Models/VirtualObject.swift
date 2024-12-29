@@ -9,16 +9,21 @@ import Foundation
 import ARKit
 import SceneKit
 
+/// A `SCNNode` subclass for virtual objects placed into the AR scene.
 class VirtualObject: SCNNode {
     
+    // MARK: - Properties
     
+    /// A unique identifier for the virtual object..
     let id: UUID
     
+    /// The model name derived from the `referenceURL`.
     var modelName: String {
-        return referenceURL?.lastPathComponent.replacingOccurrences(of: ".dae", with: " ") ?? ""
+        return referenceURL.lastPathComponent.replacingOccurrences(of: ".dae", with: "")
     }
     
-    var referenceURL: URL?
+    /// The file URL of the 3D model associated with the virtual object.
+    let referenceURL: URL
     
     /// The object's corresponding ARAnchor.
     var anchor: ARAnchor?
@@ -40,24 +45,15 @@ class VirtualObject: SCNNode {
         }
     }
     
-    
-    // MARK: - Serialization
-    
-    override init() {
-        self.id = UUID()
-        self.referenceURL = nil
-        super.init()
-    }
+    // MARK: - Initialization
     
     required init(url: URL) {
         self.referenceURL = url
         self.id = UUID()
         super.init()
-        
-//        let geometry = SCNSphere(radius: 0.05) // Example geometry
-//        self.geometry = geometry
-//        self.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
     }
+    
+    // MARK: - NSSecureCoding
     
     required init?(coder aDecoder: NSCoder) {
         guard let id = aDecoder.decodeObject(of: [NSUUID.self], forKey: "id") as? UUID else { return nil}
@@ -81,6 +77,8 @@ class VirtualObject: SCNNode {
         return true
     }
     
+    // MARK: - NSCopying
+    
     override func clone() -> Self {
         let clone = super.clone()
         if let geometry = self.geometry {
@@ -96,6 +94,8 @@ class VirtualObject: SCNNode {
     }
 }
 
+// MARK: - Helpers
+
 extension VirtualObject {
     /// Returns a `VirtualObject` if one exists as an ancestor to the provided node.
     static func existingObjectContainingNode(_ node: SCNNode) -> VirtualObject? {
@@ -107,20 +107,5 @@ extension VirtualObject {
         
         // Recurse up to check if the parent is a `VirtualObject`.
         return existingObjectContainingNode(parent)
-    }
-    
-    func toggleHighlight() {
-        let highlightMaskValue = 2
-        let normalMaskValue = 1
-        
-        if childNodes.first!.categoryBitMask == highlightMaskValue {
-            // unhighlight
-            childNodes.first!.setCategoryBitMaskForAllHierarchy(normalMaskValue)
-        } else if childNodes.first!.categoryBitMask == normalMaskValue {
-            // highlight
-            childNodes.first!.setCategoryBitMaskForAllHierarchy(highlightMaskValue)
-        } else {
-            fatalError("Unsopported category bit mask value")
-        }
     }
 }

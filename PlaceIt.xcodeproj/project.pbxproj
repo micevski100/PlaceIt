@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5656A52FAA05FFAD5D2D1FF0 /* Pods_PlaceIt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 531C97B7B100D7C90FC942E5 /* Pods_PlaceIt.framework */; };
 		EE19B70A2CECFCC900906F0A /* UIDropdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE19B7092CECFCC900906F0A /* UIDropdown.swift */; };
+		EE1EC01D2D200B41006F18D3 /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EC01C2D200B41006F18D3 /* Room.swift */; };
 		EE1FE5F12CCAC2FF00D30110 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1FE5F02CCAC2FF00D30110 /* AppDelegate.swift */; };
 		EE1FE5F32CCAC2FF00D30110 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */; };
 		EE1FE5FD2CCAC30000D30110 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = EE1FE5FC2CCAC30000D30110 /* Base */; };
@@ -46,6 +47,7 @@
 		531C97B7B100D7C90FC942E5 /* Pods_PlaceIt.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PlaceIt.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB47595DA9DB689DB5E50D17 /* Pods-PlaceIt.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PlaceIt.release.xcconfig"; path = "Target Support Files/Pods-PlaceIt/Pods-PlaceIt.release.xcconfig"; sourceTree = "<group>"; };
 		EE19B7092CECFCC900906F0A /* UIDropdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDropdown.swift; sourceTree = "<group>"; };
+		EE1EC01C2D200B41006F18D3 /* Room.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room.swift; sourceTree = "<group>"; };
 		EE1FE5ED2CCAC2FF00D30110 /* PlaceIt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlaceIt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE1FE5F02CCAC2FF00D30110 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -109,6 +111,15 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		EE1EC01B2D200B37006F18D3 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				EE1EC01C2D200B41006F18D3 /* Room.swift */,
+				EEC039972CCC3DE6003E0589 /* VirtualObject.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		EE1FE5E42CCAC2FF00D30110 = {
 			isa = PBXGroup;
 			children = (
@@ -135,6 +146,7 @@
 				EE1FE5FE2CCAC30000D30110 /* Info.plist */,
 				EEC5E9E02CCAC4B60040237B /* Extensions */,
 				EE4549B32CED68BC002A6D4F /* Enums */,
+				EE1EC01B2D200B37006F18D3 /* Models */,
 				EE4549B22CED6582002A6D4F /* Elements */,
 				EE3538EA2CD6B22300EBBF62 /* Managers */,
 				EEC5E9E12CCAC4C20040237B /* Controllers */,
@@ -272,7 +284,6 @@
 				EE875F3F2CFC9A6A006E8995 /* VirtualObjectActionPanel.swift */,
 				EE3538E62CD6407100EBBF62 /* ThresholdPanGesture.swift */,
 				EEC5E9F22CCACF1D0040237B /* Plane.swift */,
-				EEC039972CCC3DE6003E0589 /* VirtualObject.swift */,
 				EEE1D4172CDC1E0E00BC2CF8 /* SnapshotAnchor.swift */,
 			);
 			path = "Virtual Objects";
@@ -396,6 +407,7 @@
 			files = (
 				EE4549B72CED68F9002A6D4F /* MenuState.swift in Sources */,
 				EEC5E9F02CCAC7930040237B /* MainController.swift in Sources */,
+				EE1EC01D2D200B41006F18D3 /* Room.swift in Sources */,
 				EEC5E9EE2CCAC78C0040237B /* MainView.swift in Sources */,
 				EE1FE5F12CCAC2FF00D30110 /* AppDelegate.swift in Sources */,
 				EE41E59F2CEA82AC00614560 /* RoomSelectionCollectionItemCell.swift in Sources */,

@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 
 enum RoomType: String, CaseIterable, CustomStringConvertible {
+    
     case livingRoom = "Living Room"
     case diningRoom = "Dining Room"
     case guestRoom = "Guest Room"

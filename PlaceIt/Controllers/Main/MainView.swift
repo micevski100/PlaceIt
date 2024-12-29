@@ -57,7 +57,7 @@ class MainView: BaseView {
         saveExperienceButton.titleLabel?.adjustsFontSizeToFitWidth = true
         saveExperienceButton.backgroundColor = .systemGreen
         saveExperienceButton.layer.cornerRadius = 8
-        saveExperienceButton.isHidden = true
+//        saveExperienceButton.isHidden = true
         self.addSubview(saveExperienceButton)
         
         showModelsMenuButton = UIButton()

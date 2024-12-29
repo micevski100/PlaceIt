@@ -12,6 +12,15 @@ import SceneKit
 /// The primary controller of the app. Manages the placement and manipulation of virtual objects
 /// within the user's environment, and provides functionality to save the state of the arranged
 /// objects for future reference.
+
+// TODO: SCNTransaction, SCNNOdeAnimation
+/* TODO: Add
+    * SCNTransaction
+    * SCNNode Animation
+    * Launch Screen
+    * App Onboarding
+    * Optional: Object Capture
+ */
 class MainController: BaseController<MainView> {
     
     // MARK: - Properties
@@ -100,8 +109,6 @@ class MainController: BaseController<MainView> {
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
         sceneView.addGestureRecognizer(tapGesture)
-        
-        loadHighlightTechnique()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -189,9 +196,11 @@ extension MainController: ARSessionDelegate {
         // Enable Save button only when the mapping status is good and an object has been placed
         switch frame.worldMappingStatus {
         case .extending, .mapped:
-            contentView.saveExperienceButton.isHidden = !containingObject(for: frame)
+            break
+//            contentView.saveExperienceButton.isHidden = !containingObject(for: frame)
         default:
-            contentView.saveExperienceButton.isHidden = true
+            break
+//            contentView.saveExperienceButton.isHidden = true
         }
     }
     
@@ -361,9 +370,10 @@ extension MainController {
     public func addVirtualObject(withUrl modelURL: URL, at position: SCNVector3, completion: ((VirtualObject?) -> Void)? = nil) {
         guard let scene = try? SCNScene(url: modelURL) else {
             completion?(nil)
+            print("here")
             return
         }
-        
+        print("YOO")
         let virtualObject = VirtualObject(url: modelURL)
         let rootNode = SCNNode()
         scene.rootNode.childNodes.forEach { rootNode.addChildNode($0) }
@@ -466,34 +476,5 @@ extension MainController: ModelsMenuControllerDelegate {
     
     func didSelectModel(modelUrl: URL?) {
         selectedModelToPlace = modelUrl
-    }
-}
-
-// MARK: - Highligh Technique
-
-extension MainController {
-    /// Loads the technique that is used to achieve a highlight effect around selected `VirtualObject`.
-    private func loadHighlightTechnique() {
-        if let fileUrl = Bundle.main.url(forResource: "RenderOutlineTechnique", withExtension: "plist"), let data = try? Data(contentsOf: fileUrl) {
-          if var result = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] { // [String: Any] which ever it is
-            
-            // Update the size and scale factor in the original technique file
-            // to whichever size and scale factor the current device is so that
-            // we avoid crazy aliasing
-            let nativePoints = UIScreen.main.bounds
-            let nativeScale = UIScreen.main.nativeScale
-            result[keyPath: "targets.MASK.size"] = "\(nativePoints.width)x\(nativePoints.height)"
-            result[keyPath: "targets.MASK.scaleFactor"] = nativeScale
-            
-            guard let technique = SCNTechnique(dictionary: result) else {
-              fatalError("This shouldn't be happening.")
-            }
-
-            sceneView.technique = technique
-          }
-        }
-        else {
-          fatalError("This shouldn't be happening! Technique file has been deleted.")
-        }
     }
 }
