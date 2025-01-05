@@ -21,6 +21,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.backgroundColor = UIColor.init(hex: 0xF8F9FC)
         window?.rootViewController = RoomSelectionController.factoryController()
+        
+        // For testing purposes.
+//        window?.rootViewController = MainController.factoryController(.init(name: "asad", type: .bathRoom))
         window?.makeKeyAndVisible()
     }
 
@@ -51,7 +54,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
-
 }
 

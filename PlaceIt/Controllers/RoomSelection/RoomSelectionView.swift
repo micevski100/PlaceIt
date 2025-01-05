@@ -13,8 +13,6 @@ class RoomSelectionView: BaseView {
     var collectionView: UICollectionView!
     
     override func setupViews() {
-        self.backgroundColor = UIColor.init(hex: 0xF8F9FC)
-        
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.backgroundColor = .clear
         self.addSubview(collectionView)
@@ -44,4 +42,3 @@ class RoomSelectionView: BaseView {
         return UICollectionViewCompositionalLayout(section: section)
     }
 }
-

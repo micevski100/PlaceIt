@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import TipKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,11 +15,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.backgroundColor = UIColor.init(hex: 0xF8F9FC)
-        window?.rootViewController = RoomSelectionController.factoryController()
-        window?.makeKeyAndVisible()
+        Task {
+            try? Tips.resetDatastore()
+            try? Tips.configure([
+                .datastoreLocation(.applicationDefault),
+                .displayFrequency(.immediate),
+                
+            ])
+        }
         return true
     }
 

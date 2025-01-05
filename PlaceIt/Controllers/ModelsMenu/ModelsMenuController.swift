@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SnapKit
 
 protocol ModelsMenuControllerDelegate: AnyObject {
     func didSelectModel(modelUrl: URL?)

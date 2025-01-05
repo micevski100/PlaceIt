@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import SnapKit
+import TipKit
 
 class RoomSelectionController: BaseController<RoomSelectionView> {
     
@@ -19,6 +19,8 @@ class RoomSelectionController: BaseController<RoomSelectionView> {
 //        guard let rooms = try RoomManager.shared.listAll() else { return [] }
 //        return rooms
     }()
+    
+    var addRoomTip = AddRoomTip()
     
     class func factoryController() -> UINavigationController {
         let controller = RoomSelectionController()
@@ -59,6 +61,16 @@ extension RoomSelectionController: UICollectionViewDelegate, UICollectionViewDat
             let x: RoomSelectionCollectionAddItemCell = collectionView.dequeueReusableCell(withReuseIdentifier: RoomSelectionCollectionAddItemCell.identifier, for: indexPath) as! RoomSelectionCollectionAddItemCell
             x.delegate = self
             cell = x
+            
+            Task { @MainActor in
+                for await shouldDisplay in addRoomTip.shouldDisplayUpdates {
+                    guard shouldDisplay else { continue }
+                    guard self.rooms.isEmpty else { continue }
+                    
+                    let controller = TipUIPopoverViewController(addRoomTip, sourceItem: cell)
+                    self.present(controller, animated: true)
+                }
+            }
         }
         
         return cell
@@ -72,6 +84,7 @@ extension RoomSelectionController: RoomSelectionCollectionItemCellDelegate, Room
     }
     
     func addRoom() {
+        addRoomTip.invalidate(reason: .actionPerformed)
         let controller = CreateRoomController.factoryController()
         self.navigationController?.pushViewController(controller, animated: true)
     }

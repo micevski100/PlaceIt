@@ -13,10 +13,9 @@ import SceneKit
 /// within the user's environment, and provides functionality to save the state of the arranged
 /// objects for future reference.
 
-// TODO: SCNTransaction, SCNNOdeAnimation
 /* TODO: Add
     * SCNTransaction
-    * SCNNode Animation
+    * SCNNodeAnimation
     * Launch Screen
     * App Onboarding
     * Optional: Object Capture
@@ -36,7 +35,12 @@ class MainController: BaseController<MainView> {
     
     /// Holds the model selected from the menu, ready to be placed in the scene.
     /// Set when the user picks a model from the `modelsMenuController`.
-    var selectedModelToPlace: URL?
+    var selectedModelToPlace: URL? {
+        didSet {
+            guard selectedModelToPlace != nil else { return }
+            self.contentView.tryDisplayTip()
+        }
+    }
     
     /// Current state of the `modelsMenuController`.
     var menuState: MenuState = .closed
@@ -308,7 +312,7 @@ extension MainController {
             do {
                 return try self.room.getWorldMap()
             } catch {
-                fatalError(error.localizedDescription)
+                fatalError("Failed to load worldMap: \(error.localizedDescription)")
             }
         }()
         
@@ -316,7 +320,7 @@ extension MainController {
             do {
                 return try self.room.getObjects()
             } catch {
-                fatalError(error.localizedDescription)
+                fatalError("Failed to load savedModels: \(error.localizedDescription)")
             }
         }()
         
@@ -348,7 +352,9 @@ extension MainController {
     /// 2. Places a selected model if one is picked from the menu.
     /// 3. Selects an already placed model for interaction if tapped.
     @objc func didTap(_ gesture: UIGestureRecognizer) {
+        self.contentView.addModelTip.invalidate(reason: .actionPerformed)
         let touchLocation = gesture.location(in: sceneView)
+        
         switch menuState {
         case .opened:
             defer { hideModelsMenu() }
@@ -359,7 +365,8 @@ extension MainController {
             let translation = raycastResult.worldTransform.translation
             let objectPosition = SCNVector3(translation)
             
-            addVirtualObject(withUrl: selectedModelToPlace, at: objectPosition)
+//            addVirtualObject(withUrl: selectedModelToPlace, at: objectPosition)
+            self.placeObject(with: selectedModelToPlace, at: objectPosition)
             self.selectedModelToPlace = nil
         case .closed:
             virtualObjectInteraction.trackedObject = objectInteracting(with: gesture, in: sceneView)
@@ -367,13 +374,41 @@ extension MainController {
         }
     }
     
+    func placeObject(with url: URL, at position: SCNVector3) {
+        self.showLoader()
+        loadObject(with: url) { object in
+            DispatchQueue.main.async {
+                self.hideLoader()
+                guard let object else { return }
+                object.position = position
+                self.sceneView.scene.rootNode.addChildNode(object)
+                self.sceneView.addOrUpdateAnchor(for: object)
+                self.loadedModels.append(object)
+            }
+        }
+    }
+    
+    private func loadObject(with url: URL, completion: @escaping (VirtualObject?) ->  Void) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            guard let scene = try? SCNScene(url: url) else {
+                completion(nil)
+                return
+            }
+            
+            let rootNode = SCNNode()
+            scene.rootNode.childNodes.forEach { rootNode.addChildNode($0) }
+            
+            let object = VirtualObject(url: url)
+            object.addChildNode(rootNode)
+            completion(object)
+        }
+    }
+    
     public func addVirtualObject(withUrl modelURL: URL, at position: SCNVector3, completion: ((VirtualObject?) -> Void)? = nil) {
         guard let scene = try? SCNScene(url: modelURL) else {
             completion?(nil)
-            print("here")
             return
         }
-        print("YOO")
         let virtualObject = VirtualObject(url: modelURL)
         let rootNode = SCNNode()
         scene.rootNode.childNodes.forEach { rootNode.addChildNode($0) }
@@ -438,7 +473,8 @@ extension MainController: ModelsMenuControllerDelegate {
             height: self.view.height
         )
         addChild(modelsMenuController)
-        self.view.addSubview(modelsMenuController.view)
+//        self.contentView.addSubview(modelsMenuController.view)
+        self.contentView.insertSubview(modelsMenuController.view, belowSubview: self.contentView.sessionInfoView)
         modelsMenuController.didMove(toParent: self)
     }
     

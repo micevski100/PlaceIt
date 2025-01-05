@@ -23,7 +23,7 @@ class VirtualObject: SCNNode {
     }
     
     /// The file URL of the 3D model associated with the virtual object.
-    let referenceURL: URL
+    var referenceURL: URL
     
     /// The object's corresponding ARAnchor.
     var anchor: ARAnchor?
@@ -50,6 +50,12 @@ class VirtualObject: SCNNode {
     required init(url: URL) {
         self.referenceURL = url
         self.id = UUID()
+        super.init()
+    }
+    
+    private override init() {
+        id = UUID()
+        referenceURL = URL(fileURLWithPath: "/dev/null")
         super.init()
     }
     
@@ -81,6 +87,7 @@ class VirtualObject: SCNNode {
     
     override func clone() -> Self {
         let clone = super.clone()
+        clone.referenceURL = self.referenceURL
         if let geometry = self.geometry {
             let sources = geometry.sources
             let elements = geometry.elements

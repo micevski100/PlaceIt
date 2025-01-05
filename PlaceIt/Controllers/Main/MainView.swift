@@ -8,6 +8,7 @@
 import UIKit
 import ARKit
 import SnapKit
+import TipKit
 
 class MainView: BaseView {
     
@@ -19,9 +20,11 @@ class MainView: BaseView {
     var saveExperienceButton: UIButton!
     var showModelsMenuButton: UIButton!
     
+    var tipView: TipUIView?
+    var addModelTip = AddModelTip()
+    
     // MARK: - Layout
     override func setupViews() {
-        
         sceneView = ARSCNView()
         sceneView.scene = SCNScene()
         sceneView.autoenablesDefaultLighting = false
@@ -98,6 +101,32 @@ class MainView: BaseView {
         showModelsMenuButton.snp.makeConstraints { make in
             make.bottom.right.equalTo(self.safeAreaLayoutGuide).inset(20)
             make.width.height.equalTo(60)
+        }
+    }
+    
+    func tryDisplayTip() {
+        Task { @MainActor in
+            for await shouldDisplay in addModelTip.shouldDisplayUpdates {
+                guard shouldDisplay else {
+                    tipView?.removeFromSuperview()
+                    tipView = nil
+                    continue
+                }
+                
+                if (tipView != nil) {
+                    continue
+                }
+                
+                let tipHostingView = TipUIView(addModelTip)
+                self.superview?.addSubview(tipHostingView)
+                
+                tipHostingView.snp.makeConstraints { make in
+                    make.left.right.equalToSuperview().inset(20)
+                    make.bottom.equalToSuperview()
+                }
+                
+                tipView = tipHostingView
+            }
         }
     }
 }
