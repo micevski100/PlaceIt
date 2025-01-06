@@ -15,7 +15,7 @@ class VirtualObjectInteraction: NSObject {
     // MARK: - Properties
     
     /// The scene view to hit test against when moving virtual content.
-    let sceneView: ARSCNView
+    let sceneView: ARView
     
     /// A reference to the main controller.
     let controller: MainController
@@ -54,7 +54,7 @@ class VirtualObjectInteraction: NSObject {
     
     // MARK: - Initialization
     
-    init(sceneView: ARSCNView, controller: MainController) {
+    init(sceneView: ARView, controller: MainController) {
         self.sceneView = sceneView
         self.controller = controller
         super.init()
@@ -66,11 +66,8 @@ class VirtualObjectInteraction: NSObject {
         let rotationGesture = UIRotationGestureRecognizer(target: self, action: #selector(didRotate(_:)))
         rotationGesture.delegate = self
         sceneView.addGestureRecognizer(rotationGesture)
-        
-        loadHighlightTechnique()
     }
 }
-
 
 // MARK: - Gesture Actions
 
@@ -124,16 +121,12 @@ extension VirtualObjectInteraction {
                     let offset: Float = objectWidth - 0.2
                     let position = SCNVector3(trackedObject.position.x + offset, trackedObject.position.y, trackedObject.position.z)
                     
-                    self.trackedObject = nil
-                    let copyObject = trackedObject.clone()
-                    copyObject.position = position
-                    
-                    controller.placeVirtualObject(object: copyObject) { object in
+                    controller.placeObject(with: trackedObject.referenceURL, at: position) { object in
                         self.trackedObject = object
                     }
                     break
                 case "1":
-                    controller.removeVirtualObject(trackedObject)
+                    controller.virtualObjectLoader.removeObject(trackedObject)
                     self.trackedObject = nil
                     default:
                     break
@@ -191,31 +184,6 @@ extension VirtualObjectInteraction {
             object.childNodes.first!.setCategoryBitMaskForAllHierarchy(highlightMaskValue)
         } else {
             fatalError("Unsopported category bit mask value")
-        }
-    }
-    
-    /// Loads the technique that is used to achieve a highlight effect around selected `VirtualObject`.
-    private func loadHighlightTechnique() {
-        if let fileUrl = Bundle.main.url(forResource: "RenderOutlineTechnique", withExtension: "plist"), let data = try? Data(contentsOf: fileUrl) {
-          if var result = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] { // [String: Any] which ever it is
-            
-            // Update the size and scale factor in the original technique file
-            // to whichever size and scale factor the current device is so that
-            // we avoid crazy aliasing
-            let nativePoints = UIScreen.main.bounds
-            let nativeScale = UIScreen.main.nativeScale
-            result[keyPath: "targets.MASK.size"] = "\(nativePoints.width)x\(nativePoints.height)"
-            result[keyPath: "targets.MASK.scaleFactor"] = nativeScale
-            
-            guard let technique = SCNTechnique(dictionary: result) else {
-              fatalError("This shouldn't be happening.")
-            }
-
-            sceneView.technique = technique
-          }
-        }
-        else {
-          fatalError("This shouldn't be happening! Technique file has been deleted.")
         }
     }
 }

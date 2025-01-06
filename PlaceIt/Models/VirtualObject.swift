@@ -51,12 +51,16 @@ class VirtualObject: SCNNode {
         self.referenceURL = url
         self.id = UUID()
         super.init()
+        
+        animateScaleUp()
     }
     
     private override init() {
         id = UUID()
         referenceURL = URL(fileURLWithPath: "/dev/null")
         super.init()
+        
+        animateScaleUp()
     }
     
     // MARK: - NSSecureCoding
@@ -114,5 +118,28 @@ extension VirtualObject {
         
         // Recurse up to check if the parent is a `VirtualObject`.
         return existingObjectContainingNode(parent)
+    }
+}
+
+extension VirtualObject {
+    func animateScaleUp() {
+        let originalScale = scale
+        scale = SCNVector3(0, 0, 0)
+        
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 0.5
+        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        
+        scale = originalScale
+        SCNTransaction.commit()
+    }
+    
+    func animateScaleDown() {
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 0.5
+        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        
+        scale = SCNVector3(0, 0, 0)
+        SCNTransaction.commit()
     }
 }

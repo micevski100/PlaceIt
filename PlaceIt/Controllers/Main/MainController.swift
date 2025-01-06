@@ -12,26 +12,16 @@ import SceneKit
 /// The primary controller of the app. Manages the placement and manipulation of virtual objects
 /// within the user's environment, and provides functionality to save the state of the arranged
 /// objects for future reference.
-
-/* TODO: Add
-    * SCNTransaction
-    * SCNNodeAnimation
-    * Launch Screen
-    * App Onboarding
-    * Optional: Object Capture
- */
 class MainController: BaseController<MainView> {
     
     // MARK: - Properties
     
+    /// The assoicated virtual room for the current AR session.
     var room: Room!
     
     /// All surface planes that ARKit has detected.
     /// - Used for visualizing detected planes.
     var planes = [UUID : Plane]()
-    
-    /// All models loaded to the scene.
-    var loadedModels = [VirtualObject]()
     
     /// Holds the model selected from the menu, ready to be placed in the scene.
     /// Set when the user picks a model from the `modelsMenuController`.
@@ -47,6 +37,9 @@ class MainController: BaseController<MainView> {
     
     /// The view controller that displays the object selection menu.
     var modelsMenuController: UINavigationController!
+    
+    /// Coordinates the loading and unloading of reference nodes for virtual objects.
+    let virtualObjectLoader = VirtualObjectLoader()
     
     /// A type which manages gesture manipulation of virtual content in the scene.
     lazy var virtualObjectInteraction = VirtualObjectInteraction(sceneView: sceneView, controller: self)
@@ -69,7 +62,7 @@ class MainController: BaseController<MainView> {
     var isRelocalizingMap = false
     
     /// Convenience accessor for the sceneView owned by `MainView`.
-    var sceneView: ARSCNView {
+    var sceneView: ARView {
         return contentView.sceneView
     }
     
@@ -138,7 +131,6 @@ class MainController: BaseController<MainView> {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
         session.pause()
     }
 }
@@ -158,7 +150,7 @@ extension MainController: ARSCNViewDelegate {
             }
         } else {
             // Save the reference to the VirtualObject's anchor when the anchor is added from relocalizing.
-            guard let object = loadedModels.first(where: { $0.anchor == anchor }) else { return }
+            guard let object = virtualObjectLoader.loadedObjects.first(where: { $0.anchor == anchor }) else { return }
             updateQueue.async {
                 self.sceneView.scene.rootNode.addChildNode(object)
             }
@@ -175,7 +167,7 @@ extension MainController: ARSCNViewDelegate {
         
         // Update VirtualObject anchor
         updateQueue.async {
-            if let objectAtAnchor = self.loadedModels.first(where: { $0.anchor == anchor }) {
+            if let objectAtAnchor = self.virtualObjectLoader.loadedObjects.first(where: { $0.anchor == anchor }) {
                 objectAtAnchor.simdPosition = anchor.transform.translation
                 objectAtAnchor.anchor = anchor
             }
@@ -275,17 +267,13 @@ extension MainController: ARSessionDelegate {
     }
     
     private func containingObject(for frame: ARFrame) -> Bool {
-        return frame.anchors.contains(where: { anchor in loadedModels.contains { $0.anchor == anchor } })
+        return frame.anchors.contains(where: { anchor in virtualObjectLoader.loadedObjects.contains { $0.anchor == anchor } })
     }
 }
 
-// MARK: - Button Actions
+// MARK: - AR Persistence
 
 extension MainController {
-    @objc func showModelsMenuButtonClick() {
-        showModelsMenu()
-    }
-    
     @objc func saveExperienceButtonClick() {
         session.getCurrentWorldMap { worlMap, error in
             guard let map = worlMap else {
@@ -299,7 +287,7 @@ extension MainController {
             
             do {
                 try self.room.setWorldMap(map)
-                try self.room.setObjects(self.loadedModels)
+                try self.room.setObjects(self.virtualObjectLoader.loadedObjects)
                 try RoomManager.shared.save(room: self.room)
             } catch {
                 fatalError("Can't save room: \(error.localizedDescription)")
@@ -340,14 +328,14 @@ extension MainController {
         sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
         
         isRelocalizingMap = true
-        loadedModels = savedModels
+        virtualObjectLoader.setLoadedObjects(savedModels)
     }
 }
 
 // MARK: - Model Placement and Interaction
 
 extension MainController {
-    /// Handles taps on the scene view and performs actions based on context:
+    /// Handles taps on the scene view and performs actions based on the following context:
     /// 1. Dismisses the menu if it's open.
     /// 2. Places a selected model if one is picked from the menu.
     /// 3. Selects an already placed model for interaction if tapped.
@@ -365,7 +353,6 @@ extension MainController {
             let translation = raycastResult.worldTransform.translation
             let objectPosition = SCNVector3(translation)
             
-//            addVirtualObject(withUrl: selectedModelToPlace, at: objectPosition)
             self.placeObject(with: selectedModelToPlace, at: objectPosition)
             self.selectedModelToPlace = nil
         case .closed:
@@ -374,65 +361,28 @@ extension MainController {
         }
     }
     
-    func placeObject(with url: URL, at position: SCNVector3) {
-        self.showLoader()
-        loadObject(with: url) { object in
-            DispatchQueue.main.async {
-                self.hideLoader()
-                guard let object else { return }
-                object.position = position
-                self.sceneView.scene.rootNode.addChildNode(object)
-                self.sceneView.addOrUpdateAnchor(for: object)
-                self.loadedModels.append(object)
+    /// Loads the specified `VirtualObject` from the provided URL, and places it  at the given position.
+    func placeObject(with url: URL, at position: SCNVector3, completion: @escaping (VirtualObject) -> Void = { _ in }) {
+        virtualObjectLoader.loadObject(with: url) { [unowned self] object in
+            do {
+                let scene = try SCNScene(url: object.referenceURL, options: nil)
+                self.sceneView.prepare([scene]) { _ in
+                    DispatchQueue.main.async {
+                        object.position = position
+                        self.sceneView.scene.rootNode.addChildNode(object)
+                        object.animateScaleUp()
+                        
+                        self.updateQueue.async {
+                            self.sceneView.addOrUpdateAnchor(for: object)
+                        }
+                        
+                        completion(object)
+                    }
+                }
+            } catch {
+                fatalError("Failed to load SCNScene from object.referenceURL")
             }
         }
-    }
-    
-    private func loadObject(with url: URL, completion: @escaping (VirtualObject?) ->  Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            guard let scene = try? SCNScene(url: url) else {
-                completion(nil)
-                return
-            }
-            
-            let rootNode = SCNNode()
-            scene.rootNode.childNodes.forEach { rootNode.addChildNode($0) }
-            
-            let object = VirtualObject(url: url)
-            object.addChildNode(rootNode)
-            completion(object)
-        }
-    }
-    
-    public func addVirtualObject(withUrl modelURL: URL, at position: SCNVector3, completion: ((VirtualObject?) -> Void)? = nil) {
-        guard let scene = try? SCNScene(url: modelURL) else {
-            completion?(nil)
-            return
-        }
-        let virtualObject = VirtualObject(url: modelURL)
-        let rootNode = SCNNode()
-        scene.rootNode.childNodes.forEach { rootNode.addChildNode($0) }
-        virtualObject.addChildNode(rootNode)
-        virtualObject.position = position
-        placeVirtualObject(object: virtualObject)
-    }
-    
-    public func placeVirtualObject(object: VirtualObject, completion: ((VirtualObject?) -> Void)? = nil) {
-        updateQueue.async {
-            self.sceneView.scene.rootNode.addChildNode(object)
-            self.sceneView.addOrUpdateAnchor(for: object)
-            
-            DispatchQueue.main.async {
-                completion?(object)
-            }
-        }
-        loadedModels.append(object)
-    }
-    
-    func removeVirtualObject(_ object: VirtualObject) {
-        guard let objectIndex = loadedModels.firstIndex(of: object) else { return }
-        object.removeFromParentNode()
-        loadedModels.remove(at: objectIndex)
     }
     
     /** A helper method to return the first object that is found under the provided `gesture`s touch locations.
@@ -440,7 +390,6 @@ extension MainController {
      boxes of the virtual objects, this function makes it more likely that a user touch will affect the object even if the
      touch location isn't on a point where the object has visible content. By performing multiple hit tests for multitouch
      gestures, the method makes it more likely that the user touch affects the intended object.
-      - Tag: TouchTesting
     */
     private func objectInteracting(with gesture: UIGestureRecognizer, in view: ARSCNView) -> VirtualObject? {
         for index in 0..<gesture.numberOfTouches {
@@ -479,7 +428,7 @@ extension MainController: ModelsMenuControllerDelegate {
     }
     
     /// Shows the `modelsMenuController` when the user taps on the `showObjectsMenuButton`.
-    private func showModelsMenu() {
+    @objc func showModelsMenuButtonClick() {
         self.navigationController?.setNavigationBarHidden(true, animated: true)
         menuState = .opened
         UIView.animate(
@@ -510,6 +459,7 @@ extension MainController: ModelsMenuControllerDelegate {
         }
     }
     
+    /// `ModelsMenuControllerDelegate` method for when the user has selected a `VirtualObject` for placement.
     func didSelectModel(modelUrl: URL?) {
         selectedModelToPlace = modelUrl
     }

@@ -13,7 +13,7 @@ import TipKit
 class MainView: BaseView {
     
     // MARK: - UI Elements
-    var sceneView: ARSCNView!
+    var sceneView: ARView!
     var snapshotThumbnailImageView: UIImageView!
     var sessionInfoView: UIVisualEffectView! // TODO: Addd fade in animation.
     var sessionInfoLabel: UILabel!
@@ -25,7 +25,7 @@ class MainView: BaseView {
     
     // MARK: - Layout
     override func setupViews() {
-        sceneView = ARSCNView()
+        sceneView = ARView(frame: .zero)
         sceneView.scene = SCNScene()
         sceneView.autoenablesDefaultLighting = false
         sceneView.automaticallyUpdatesLighting = false

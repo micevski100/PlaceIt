@@ -9,13 +9,14 @@
 /* Begin PBXBuildFile section */
 		5656A52FAA05FFAD5D2D1FF0 /* Pods_PlaceIt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 531C97B7B100D7C90FC942E5 /* Pods_PlaceIt.framework */; };
 		EE0404722D2942FF00B9DA2F /* AddModelTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0404712D2942FA00B9DA2F /* AddModelTip.swift */; };
+		EE0404752D2BE02500B9DA2F /* VirtualObjectLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0404742D2BE01F00B9DA2F /* VirtualObjectLoader.swift */; };
+		EE0404792D2C0D2300B9DA2F /* ARView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0404782D2C0D2000B9DA2F /* ARView.swift */; };
 		EE19B70A2CECFCC900906F0A /* UIDropdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE19B7092CECFCC900906F0A /* UIDropdown.swift */; };
 		EE1EC01D2D200B41006F18D3 /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EC01C2D200B41006F18D3 /* Room.swift */; };
 		EE1EC0252D21BE0C006F18D3 /* UIFullLoadingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EC0242D21BDF1006F18D3 /* UIFullLoadingController.swift */; };
 		EE1FE5F12CCAC2FF00D30110 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1FE5F02CCAC2FF00D30110 /* AppDelegate.swift */; };
 		EE1FE5F32CCAC2FF00D30110 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */; };
 		EE1FE5FD2CCAC30000D30110 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = EE1FE5FC2CCAC30000D30110 /* Base */; };
-		EE3295202D25E24500FE2344 /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE32951F2D25E24300FE2344 /* Test.swift */; };
 		EE3295232D25EB3700FE2344 /* AddRoomTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3295222D25EB3300FE2344 /* AddRoomTip.swift */; };
 		EE3538E72CD6407100EBBF62 /* ThresholdPanGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3538E62CD6407100EBBF62 /* ThresholdPanGesture.swift */; };
 		EE3538E92CD6455300EBBF62 /* VirtualObjectInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3538E82CD6455300EBBF62 /* VirtualObjectInteraction.swift */; };
@@ -51,6 +52,8 @@
 		531C97B7B100D7C90FC942E5 /* Pods_PlaceIt.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PlaceIt.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB47595DA9DB689DB5E50D17 /* Pods-PlaceIt.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PlaceIt.release.xcconfig"; path = "Target Support Files/Pods-PlaceIt/Pods-PlaceIt.release.xcconfig"; sourceTree = "<group>"; };
 		EE0404712D2942FA00B9DA2F /* AddModelTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddModelTip.swift; sourceTree = "<group>"; };
+		EE0404742D2BE01F00B9DA2F /* VirtualObjectLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObjectLoader.swift; sourceTree = "<group>"; };
+		EE0404782D2C0D2000B9DA2F /* ARView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARView.swift; sourceTree = "<group>"; };
 		EE19B7092CECFCC900906F0A /* UIDropdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDropdown.swift; sourceTree = "<group>"; };
 		EE1EC01C2D200B41006F18D3 /* Room.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room.swift; sourceTree = "<group>"; };
 		EE1EC0242D21BDF1006F18D3 /* UIFullLoadingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFullLoadingController.swift; sourceTree = "<group>"; };
@@ -59,7 +62,6 @@
 		EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		EE1FE5FC2CCAC30000D30110 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		EE1FE5FE2CCAC30000D30110 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		EE32951F2D25E24300FE2344 /* Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
 		EE3295222D25EB3300FE2344 /* AddRoomTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRoomTip.swift; sourceTree = "<group>"; };
 		EE3538E62CD6407100EBBF62 /* ThresholdPanGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThresholdPanGesture.swift; sourceTree = "<group>"; };
 		EE3538E82CD6455300EBBF62 /* VirtualObjectInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObjectInteraction.swift; sourceTree = "<group>"; };
@@ -157,7 +159,6 @@
 		EE1FE5EF2CCAC2FF00D30110 /* PlaceIt */ = {
 			isa = PBXGroup;
 			children = (
-				EE32951F2D25E24300FE2344 /* Test.swift */,
 				EE1FE5F02CCAC2FF00D30110 /* AppDelegate.swift */,
 				EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */,
 				EE1FE5FE2CCAC30000D30110 /* Info.plist */,
@@ -185,6 +186,7 @@
 		EE3538EA2CD6B22300EBBF62 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				EE0404742D2BE01F00B9DA2F /* VirtualObjectLoader.swift */,
 				EE3538E82CD6455300EBBF62 /* VirtualObjectInteraction.swift */,
 				EE41E5962CEA251400614560 /* RoomManager.swift */,
 			);
@@ -309,6 +311,7 @@
 		EEC5E9F12CCACF0D0040237B /* Virtual Objects */ = {
 			isa = PBXGroup;
 			children = (
+				EE0404782D2C0D2000B9DA2F /* ARView.swift */,
 				EE875F3F2CFC9A6A006E8995 /* VirtualObjectActionPanel.swift */,
 				EE3538E62CD6407100EBBF62 /* ThresholdPanGesture.swift */,
 				EEC5E9F22CCACF1D0040237B /* Plane.swift */,
@@ -435,6 +438,7 @@
 			files = (
 				EE3295232D25EB3700FE2344 /* AddRoomTip.swift in Sources */,
 				EE4549B72CED68F9002A6D4F /* MenuState.swift in Sources */,
+				EE0404792D2C0D2300B9DA2F /* ARView.swift in Sources */,
 				EEC5E9F02CCAC7930040237B /* MainController.swift in Sources */,
 				EE1EC01D2D200B41006F18D3 /* Room.swift in Sources */,
 				EEC5E9EE2CCAC78C0040237B /* MainView.swift in Sources */,
@@ -442,6 +446,7 @@
 				EE41E59F2CEA82AC00614560 /* RoomSelectionCollectionItemCell.swift in Sources */,
 				EE41E59A2CEA26C100614560 /* RoomSelectionView.swift in Sources */,
 				EEC0399B2CCCE0FD003E0589 /* ModelsMenuView.swift in Sources */,
+				EE0404752D2BE02500B9DA2F /* VirtualObjectLoader.swift in Sources */,
 				EEC5E9F52CCAD8270040237B /* Extensions.swift in Sources */,
 				EE41E5A12CEA8A8100614560 /* RoomSelectionCollectionAddItemCell.swift in Sources */,
 				EE41E59C2CEA26C800614560 /* RoomSelectionController.swift in Sources */,
@@ -451,7 +456,6 @@
 				EE3538E92CD6455300EBBF62 /* VirtualObjectInteraction.swift in Sources */,
 				EE3538E72CD6407100EBBF62 /* ThresholdPanGesture.swift in Sources */,
 				EE1EC0252D21BE0C006F18D3 /* UIFullLoadingController.swift in Sources */,
-				EE3295202D25E24500FE2344 /* Test.swift in Sources */,
 				EE0404722D2942FF00B9DA2F /* AddModelTip.swift in Sources */,
 				EE41E5972CEA251400614560 /* RoomManager.swift in Sources */,
 				EE41E5A62CEAA2FC00614560 /* CreateRoomController.swift in Sources */,
