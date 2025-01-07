@@ -10,7 +10,7 @@ import TipKit
 
 class RoomSelectionController: BaseController<RoomSelectionView> {
     
-    private let rooms: [Room] = {
+    private var rooms: [Room] {
         do {
             return try RoomManager.shared.listAll()
         } catch {
@@ -18,7 +18,7 @@ class RoomSelectionController: BaseController<RoomSelectionView> {
         }
 //        guard let rooms = try RoomManager.shared.listAll() else { return [] }
 //        return rooms
-    }()
+    }
     
     var addRoomTip = AddRoomTip()
     
@@ -41,6 +41,7 @@ class RoomSelectionController: BaseController<RoomSelectionView> {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.prefersLargeTitles = true
+        self.contentView.collectionView.reloadData()
     }
 }
 

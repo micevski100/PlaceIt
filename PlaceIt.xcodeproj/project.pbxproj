@@ -11,6 +11,8 @@
 		EE0404722D2942FF00B9DA2F /* AddModelTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0404712D2942FA00B9DA2F /* AddModelTip.swift */; };
 		EE0404752D2BE02500B9DA2F /* VirtualObjectLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0404742D2BE01F00B9DA2F /* VirtualObjectLoader.swift */; };
 		EE0404792D2C0D2300B9DA2F /* ARView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0404782D2C0D2000B9DA2F /* ARView.swift */; };
+		EE04047B2D2C165F00B9DA2F /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE04047A2D2C165E00B9DA2F /* Test.swift */; };
+		EE04047D2D2C207300B9DA2F /* ShutterButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE04047C2D2C206F00B9DA2F /* ShutterButton.swift */; };
 		EE19B70A2CECFCC900906F0A /* UIDropdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE19B7092CECFCC900906F0A /* UIDropdown.swift */; };
 		EE1EC01D2D200B41006F18D3 /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EC01C2D200B41006F18D3 /* Room.swift */; };
 		EE1EC0252D21BE0C006F18D3 /* UIFullLoadingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EC0242D21BDF1006F18D3 /* UIFullLoadingController.swift */; };
@@ -54,6 +56,8 @@
 		EE0404712D2942FA00B9DA2F /* AddModelTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddModelTip.swift; sourceTree = "<group>"; };
 		EE0404742D2BE01F00B9DA2F /* VirtualObjectLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObjectLoader.swift; sourceTree = "<group>"; };
 		EE0404782D2C0D2000B9DA2F /* ARView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARView.swift; sourceTree = "<group>"; };
+		EE04047A2D2C165E00B9DA2F /* Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
+		EE04047C2D2C206F00B9DA2F /* ShutterButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShutterButton.swift; sourceTree = "<group>"; };
 		EE19B7092CECFCC900906F0A /* UIDropdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDropdown.swift; sourceTree = "<group>"; };
 		EE1EC01C2D200B41006F18D3 /* Room.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room.swift; sourceTree = "<group>"; };
 		EE1EC0242D21BDF1006F18D3 /* UIFullLoadingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFullLoadingController.swift; sourceTree = "<group>"; };
@@ -159,6 +163,7 @@
 		EE1FE5EF2CCAC2FF00D30110 /* PlaceIt */ = {
 			isa = PBXGroup;
 			children = (
+				EE04047A2D2C165E00B9DA2F /* Test.swift */,
 				EE1FE5F02CCAC2FF00D30110 /* AppDelegate.swift */,
 				EE1FE5F22CCAC2FF00D30110 /* SceneDelegate.swift */,
 				EE1FE5FE2CCAC30000D30110 /* Info.plist */,
@@ -224,8 +229,9 @@
 		EE4549B22CED6582002A6D4F /* Elements */ = {
 			isa = PBXGroup;
 			children = (
-				EEC5E9F12CCACF0D0040237B /* Virtual Objects */,
+				EE04047C2D2C206F00B9DA2F /* ShutterButton.swift */,
 				EE19B7092CECFCC900906F0A /* UIDropdown.swift */,
+				EEC5E9F12CCACF0D0040237B /* Virtual Objects */,
 			);
 			path = Elements;
 			sourceTree = "<group>";
@@ -457,10 +463,12 @@
 				EE3538E72CD6407100EBBF62 /* ThresholdPanGesture.swift in Sources */,
 				EE1EC0252D21BE0C006F18D3 /* UIFullLoadingController.swift in Sources */,
 				EE0404722D2942FF00B9DA2F /* AddModelTip.swift in Sources */,
+				EE04047B2D2C165F00B9DA2F /* Test.swift in Sources */,
 				EE41E5972CEA251400614560 /* RoomManager.swift in Sources */,
 				EE41E5A62CEAA2FC00614560 /* CreateRoomController.swift in Sources */,
 				EEE1D4182CDC1E0E00BC2CF8 /* SnapshotAnchor.swift in Sources */,
 				EEC039982CCC3DE6003E0589 /* VirtualObject.swift in Sources */,
+				EE04047D2D2C207300B9DA2F /* ShutterButton.swift in Sources */,
 				EEEEA0752CF11AB5004E1F92 /* ModelsMenuController.swift in Sources */,
 				EE1FE5F32CCAC2FF00D30110 /* SceneDelegate.swift in Sources */,
 				EEEEA0772CF11B6E004E1F92 /* ModelsMenuCollectionCell.swift in Sources */,

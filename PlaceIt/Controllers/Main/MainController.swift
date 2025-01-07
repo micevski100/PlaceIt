@@ -81,6 +81,34 @@ class MainController: BaseController<MainView> {
         return true
     }
     
+    var saveSessionAlertController: UIAlertController {
+        let alertController = UIAlertController(title: "Do you want to save your current session", message: "If you do not save your session you will lose all progress", preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "Go Back", style: .destructive) { _ in
+            self.navigationController?.popViewController(animated: true)
+        }
+        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
+            self.present(self.saveSessionTipAlertController, animated: true)
+        }
+        
+        alertController.addAction(saveAction)
+        alertController.addAction(cancelAction)
+        
+        return alertController
+    }
+    
+    var saveSessionTipAlertController: UIAlertController {
+        let alertController = UIAlertController(title: "Take a Snapshot of the Current Session", message: "To save your session, you need to take a snapshot. This snapshot will be required when you revisit your room. Aligning the camera's view with the snapshot is essential to accurately load your saved session.", preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+            UIView.animate(withDuration: 0.2) {
+                self.contentView.shutterButton.alpha = 1
+            }
+        }
+        
+        alertController.addAction(okAction)
+        
+        return alertController
+    }
+    
     // MARK: - Life Cycle
     
     class func factoryController(_ room: Room) -> BaseController<MainView> {
@@ -91,7 +119,8 @@ class MainController: BaseController<MainView> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.tintColor = .white
+//        self.navigationController?.navigationBar.tintColor = .white
+        setupCustomBackButton()
         sceneView.delegate = self
         session.delegate = self
         
@@ -102,7 +131,8 @@ class MainController: BaseController<MainView> {
                                                                       delegate: self)
         
         self.contentView.showModelsMenuButton.addTarget(self, action: #selector(showModelsMenuButtonClick), for: .touchUpInside)
-        self.contentView.saveExperienceButton.addTarget(self, action: #selector(saveExperienceButtonClick), for: .touchUpInside)
+//        self.contentView.saveExperienceButton.addTarget(self, action: #selector(saveExperienceButtonClick), for: .touchUpInside)
+        self.contentView.shutterButton.addTarget(self, action: #selector(shutterButtonClick), for: .touchUpInside)
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
         sceneView.addGestureRecognizer(tapGesture)
@@ -131,7 +161,30 @@ class MainController: BaseController<MainView> {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        
+        if self.isMovingFromParent {
+            return
+        }
+        
         session.pause()
+    }
+    
+    func setupCustomBackButton() {
+        self.navigationItem.hidesBackButton = true
+        
+        let customButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonClick))
+        customButton.tintColor = .white
+        
+        self.navigationItem.leftBarButtonItem = customButton
+    }
+    
+    
+    @objc func backButtonClick() {
+        self.present(saveSessionAlertController, animated: true)
+    }
+    
+    @objc func shutterButtonClick() {
+        saveExperienceButtonClick()
     }
 }
 
@@ -284,11 +337,14 @@ extension MainController {
             // Add a snapshot image indicating where the map was captured.
             guard let snapshotAnchor = SnapshotAnchor(capturing: self.sceneView) else { fatalError("Can't take snapshot") }
             map.anchors.append(snapshotAnchor)
-            
+            self.contentView.test.image = UIImage(data: snapshotAnchor.imageData)
             do {
                 try self.room.setWorldMap(map)
                 try self.room.setObjects(self.virtualObjectLoader.loadedObjects)
                 try RoomManager.shared.save(room: self.room)
+                self.contentView.testAnim { _ in
+                    self.navigationController?.popViewController(animated: true)
+                }
             } catch {
                 fatalError("Can't save room: \(error.localizedDescription)")
             }
