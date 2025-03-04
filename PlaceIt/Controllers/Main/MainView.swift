@@ -17,7 +17,7 @@ class MainView: BaseView {
     var snapshotThumbnailImageView: UIImageView!
     var sessionInfoView: UIVisualEffectView! // TODO: Addd fade in animation.
     var sessionInfoLabel: UILabel!
-//    var saveExperienceButton: UIButton!
+    var saveExperienceButton: UIButton!
     var shutterButton: ShutterButton!
     var showModelsMenuButton: UIButton!
     
@@ -67,14 +67,14 @@ class MainView: BaseView {
         sessionInfoLabel.numberOfLines = 3
         sessionInfoView.contentView.addSubview(sessionInfoLabel)
         
-//        saveExperienceButton = UIButton()
-//        saveExperienceButton.setTitle("Save Experience", for: .normal)
-//        saveExperienceButton.setTitleColor(.white, for: [])
-//        saveExperienceButton.titleLabel?.adjustsFontSizeToFitWidth = true
-//        saveExperienceButton.backgroundColor = .systemGreen
-//        saveExperienceButton.layer.cornerRadius = 8
-////        saveExperienceButton.isHidden = true
-//        self.addSubview(saveExperienceButton)
+        saveExperienceButton = UIButton()
+        saveExperienceButton.setTitle("Save Experience", for: .normal)
+        saveExperienceButton.setTitleColor(.white, for: [])
+        saveExperienceButton.titleLabel?.adjustsFontSizeToFitWidth = true
+        saveExperienceButton.backgroundColor = .systemGreen
+        saveExperienceButton.layer.cornerRadius = 8
+        saveExperienceButton.isHidden = true
+        self.addSubview(saveExperienceButton)
         self.addSubview(test)
         
         shutterButton = ShutterButton()
@@ -110,12 +110,12 @@ class MainView: BaseView {
             make.edges.equalToSuperview().inset(10)
         }
         
-//        saveExperienceButton.snp.makeConstraints { make in
-//            make.centerX.equalToSuperview()
-//            make.centerY.equalTo(showModelsMenuButton)
-//            make.width.equalToSuperview().multipliedBy(0.5)
-//            make.height.equalTo(40)
-//        }
+        saveExperienceButton.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.centerY.equalTo(showModelsMenuButton)
+            make.width.equalToSuperview().multipliedBy(0.5)
+            make.height.equalTo(40)
+        }
         
         shutterButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
@@ -137,7 +137,7 @@ class MainView: BaseView {
         }
     }
     
-    func testAnim(completion: @escaping (Bool) -> Void) {
+    func shutterAnimation(completion: @escaping (Bool) -> Void) {
         self.layoutIfNeeded()
         let targetWidth = self.width * 0.36
         let targetHeight = self.height * 0.33
@@ -160,6 +160,13 @@ class MainView: BaseView {
             }
         }
 
+    }
+    
+    func enterShutterMode() {
+        UIView.animate(withDuration: 0.2) {
+            self.shutterButton.alpha = 1
+            self.saveExperienceButton.alpha = 0
+        }
     }
     
     func tryDisplayTip() {

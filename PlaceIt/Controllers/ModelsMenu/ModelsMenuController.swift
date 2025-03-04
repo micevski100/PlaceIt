@@ -103,7 +103,10 @@ extension ModelsMenuController: UICollectionViewDataSource, UICollectionViewDele
             controller.delegate = delegate
             self.navigationController?.pushViewController(controller, animated: true)
         } else {
+            print("Here 1")
+            let x = data[indexPath.row]
             guard let modelUrl = getModelUrl(at: data[indexPath.row]) else { return }
+            print("here 2")
             delegate?.didSelectModel(modelUrl: modelUrl)
         }
     }
@@ -137,7 +140,8 @@ extension ModelsMenuController {
             .map { $0 as! URL }
             .first {
                 $0.isFileURL &&
-                $0.pathExtension == "dae"
+                $0.pathExtension == "scn" &&
+                $0.lastPathComponent.contains("1")
             }
     }
 }

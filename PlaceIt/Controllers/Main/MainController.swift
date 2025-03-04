@@ -71,12 +71,12 @@ class MainController: BaseController<MainView> {
         return contentView.sceneView.session
     }
     
-    /// Lock the orientation of the app to the orientation in which it is launched
+    /// Lock the orientation of the app to the orientation in which it is launched.
     override var shouldAutorotate: Bool {
         return false
     }
     
-    /// Hide the visual indicator for returning to the Home Screen
+    /// Hide the visual indicator for returning to the Home Screen.
     override var prefersHomeIndicatorAutoHidden: Bool {
         return true
     }
@@ -87,24 +87,11 @@ class MainController: BaseController<MainView> {
             self.navigationController?.popViewController(animated: true)
         }
         let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
-            self.present(self.saveSessionTipAlertController, animated: true)
+            self.contentView.enterShutterMode()
         }
         
         alertController.addAction(saveAction)
         alertController.addAction(cancelAction)
-        
-        return alertController
-    }
-    
-    var saveSessionTipAlertController: UIAlertController {
-        let alertController = UIAlertController(title: "Take a Snapshot of the Current Session", message: "To save your session, you need to take a snapshot. This snapshot will be required when you revisit your room. Aligning the camera's view with the snapshot is essential to accurately load your saved session.", preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-            UIView.animate(withDuration: 0.2) {
-                self.contentView.shutterButton.alpha = 1
-            }
-        }
-        
-        alertController.addAction(okAction)
         
         return alertController
     }
@@ -119,7 +106,6 @@ class MainController: BaseController<MainView> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        self.navigationController?.navigationBar.tintColor = .white
         setupCustomBackButton()
         sceneView.delegate = self
         session.delegate = self
@@ -131,7 +117,7 @@ class MainController: BaseController<MainView> {
                                                                       delegate: self)
         
         self.contentView.showModelsMenuButton.addTarget(self, action: #selector(showModelsMenuButtonClick), for: .touchUpInside)
-//        self.contentView.saveExperienceButton.addTarget(self, action: #selector(saveExperienceButtonClick), for: .touchUpInside)
+        self.contentView.saveExperienceButton.addTarget(self, action: #selector(saveExperienceButtonClick), for: .touchUpInside)
         self.contentView.shutterButton.addTarget(self, action: #selector(shutterButtonClick), for: .touchUpInside)
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTap(_:)))
@@ -146,6 +132,7 @@ class MainController: BaseController<MainView> {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        self.showLoader()
         session.run(defaultConfiguration)
         attachModelsMenuController()
         
@@ -176,15 +163,6 @@ class MainController: BaseController<MainView> {
         customButton.tintColor = .white
         
         self.navigationItem.leftBarButtonItem = customButton
-    }
-    
-    
-    @objc func backButtonClick() {
-        self.present(saveSessionAlertController, animated: true)
-    }
-    
-    @objc func shutterButtonClick() {
-        saveExperienceButtonClick()
     }
 }
 
@@ -245,11 +223,9 @@ extension MainController: ARSessionDelegate {
         // Enable Save button only when the mapping status is good and an object has been placed
         switch frame.worldMappingStatus {
         case .extending, .mapped:
-            break
-//            contentView.saveExperienceButton.isHidden = !containingObject(for: frame)
+            contentView.saveExperienceButton.isHidden = !containingObject(for: frame)
         default:
-            break
-//            contentView.saveExperienceButton.isHidden = true
+            contentView.saveExperienceButton.isHidden = true
         }
     }
     
@@ -305,9 +281,11 @@ extension MainController: ARSessionDelegate {
             }
             
         case (.normal, _) where !room.isArchived:
+            self.hideLoader()
             message = "Move around to map the environment."
         
         case (.limited(.relocalizing), _) where isRelocalizingMap:
+            self.hideLoader()
             message = "Move your device to the location shown in the image."
             contentView.snapshotThumbnailImageView.isHidden = false
         
@@ -327,7 +305,7 @@ extension MainController: ARSessionDelegate {
 // MARK: - AR Persistence
 
 extension MainController {
-    @objc func saveExperienceButtonClick() {
+    private func saveExperience() {
         session.getCurrentWorldMap { worlMap, error in
             guard let map = worlMap else {
                 self.showAlert(title: "Can't get current world map", message: error!.localizedDescription)
@@ -342,7 +320,7 @@ extension MainController {
                 try self.room.setWorldMap(map)
                 try self.room.setObjects(self.virtualObjectLoader.loadedObjects)
                 try RoomManager.shared.save(room: self.room)
-                self.contentView.testAnim { _ in
+                self.contentView.shutterAnimation { _ in
                     self.navigationController?.popViewController(animated: true)
                 }
             } catch {
@@ -412,7 +390,8 @@ extension MainController {
             self.placeObject(with: selectedModelToPlace, at: objectPosition)
             self.selectedModelToPlace = nil
         case .closed:
-            virtualObjectInteraction.trackedObject = objectInteracting(with: gesture, in: sceneView)
+            let selectedObject = objectInteracting(with: gesture, in: sceneView)
+            virtualObjectInteraction.trackedObject = selectedObject
             virtualObjectInteraction.didTap(location: touchLocation)
         }
     }
@@ -478,7 +457,6 @@ extension MainController: ModelsMenuControllerDelegate {
             height: self.view.height
         )
         addChild(modelsMenuController)
-//        self.contentView.addSubview(modelsMenuController.view)
         self.contentView.insertSubview(modelsMenuController.view, belowSubview: self.contentView.sessionInfoView)
         modelsMenuController.didMove(toParent: self)
     }
@@ -518,5 +496,25 @@ extension MainController: ModelsMenuControllerDelegate {
     /// `ModelsMenuControllerDelegate` method for when the user has selected a `VirtualObject` for placement.
     func didSelectModel(modelUrl: URL?) {
         selectedModelToPlace = modelUrl
+    }
+}
+
+// MARK: - Button Actions
+
+extension MainController {
+    @objc func backButtonClick() {
+        if virtualObjectLoader.loadedObjects.count > 0 {
+            self.present(saveSessionAlertController, animated: true)
+        } else {
+            self.navigationController?.popViewController(animated: true)
+        }
+    }
+    
+    @objc func saveExperienceButtonClick() {
+        self.contentView.enterShutterMode()
+    }
+    
+    @objc func shutterButtonClick() {
+        saveExperience()
     }
 }

@@ -11,19 +11,18 @@ import SceneKit
 
 class VirtualObjectActionPanel: SCNNode {
     
-    let actions: [Any]
+    var textureNode: SCNNode!
     
-    
-    static let defaultActions: [Any] = [
-        UIImage(systemName: "document.on.document.fill")!,
-        UIImage(systemName: "trash.fill")!
+    private let actions: [(String, Any?)] = [
+        ("delete", UIImage(systemName: "trash.fill")),
+        ("copy", UIImage(systemName: "document.on.document.fill")),
+        ("texture", nil),
     ]
+     
     
-    required init(actions: [Any] = VirtualObjectActionPanel.defaultActions) {
-        self.actions = actions
+    override init() {
         super.init()
-        
-        setup(with: actions)
+        setup()
     }
     
     required init?(coder: NSCoder) {
@@ -47,7 +46,7 @@ class VirtualObjectActionPanel: SCNNode {
         return image
     }
     
-    private func setup(with actions: [Any]) {
+    private func setup() {
         let n = CGFloat(actions.count)
         let padding = 0.03
         let pixelsPerUnit: CGFloat = 500
@@ -70,22 +69,26 @@ class VirtualObjectActionPanel: SCNNode {
         self.geometry = containerGeometry
         
         
-        for i in 0..<actions.count {
+        for (i, (key, value)) in actions.enumerated() {
             let xLeft = (-containerWidth / 2) + (btnWidth / 2)
             let x = xLeft + CGFloat(i + 1) * padding + CGFloat(i) * btnWidth
             
             
             let btnGeometry = SCNPlane(width: btnWidth, height: btnHeight)
-            btnGeometry.firstMaterial?.diffuse.contents = actions[i]
+            btnGeometry.firstMaterial?.diffuse.contents = value
             btnGeometry.cornerRadius = btnHeight / 2
             
             let btnNode = SCNNode(geometry: btnGeometry)
-            btnNode.name = "\(i)"
+            btnNode.name = key
             btnNode.position = SCNVector3(x, 0, 0.01)
+            
+            if key == "texture" {
+                textureNode = btnNode
+            }
             
             self.addChildNode(btnNode)
         }
-        
+//        
         let billboardConstraint = SCNBillboardConstraint()
         self.constraints = [billboardConstraint]
     }

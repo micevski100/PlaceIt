@@ -34,6 +34,9 @@
 		EE875F402CFC9A73006E8995 /* VirtualObjectActionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE875F3F2CFC9A6A006E8995 /* VirtualObjectActionPanel.swift */; };
 		EE8F9D702CD4104C00CB0C2B /* RenderOutlineShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = EE8F9D6D2CD4104C00CB0C2B /* RenderOutlineShaders.metal */; };
 		EE8F9D712CD4104C00CB0C2B /* RenderOutlineTechnique.plist in Resources */ = {isa = PBXBuildFile; fileRef = EE8F9D6E2CD4104C00CB0C2B /* RenderOutlineTechnique.plist */; };
+		EEBD6C062D464E5F00F2C1E0 /* EditVirtualObjectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBD6C052D464E5A00F2C1E0 /* EditVirtualObjectView.swift */; };
+		EEBD6C082D464E6C00F2C1E0 /* EditVirtualObjectController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBD6C072D464E6300F2C1E0 /* EditVirtualObjectController.swift */; };
+		EEBD6C0A2D464E8300F2C1E0 /* EditVirtualObjectCollectionItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBD6C092D464E7600F2C1E0 /* EditVirtualObjectCollectionItemCell.swift */; };
 		EEC039942CCC1ED5003E0589 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EEC039932CCC1ED5003E0589 /* Assets.xcassets */; };
 		EEC039982CCC3DE6003E0589 /* VirtualObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC039972CCC3DE6003E0589 /* VirtualObject.swift */; };
 		EEC0399B2CCCE0FD003E0589 /* ModelsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC0399A2CCCE0FD003E0589 /* ModelsMenuView.swift */; };
@@ -81,6 +84,9 @@
 		EE875F3F2CFC9A6A006E8995 /* VirtualObjectActionPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObjectActionPanel.swift; sourceTree = "<group>"; };
 		EE8F9D6D2CD4104C00CB0C2B /* RenderOutlineShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = RenderOutlineShaders.metal; sourceTree = "<group>"; };
 		EE8F9D6E2CD4104C00CB0C2B /* RenderOutlineTechnique.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RenderOutlineTechnique.plist; sourceTree = "<group>"; };
+		EEBD6C052D464E5A00F2C1E0 /* EditVirtualObjectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditVirtualObjectView.swift; sourceTree = "<group>"; };
+		EEBD6C072D464E6300F2C1E0 /* EditVirtualObjectController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditVirtualObjectController.swift; sourceTree = "<group>"; };
+		EEBD6C092D464E7600F2C1E0 /* EditVirtualObjectCollectionItemCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditVirtualObjectCollectionItemCell.swift; sourceTree = "<group>"; };
 		EEC039932CCC1ED5003E0589 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EEC039972CCC3DE6003E0589 /* VirtualObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObject.swift; sourceTree = "<group>"; };
 		EEC0399A2CCCE0FD003E0589 /* ModelsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsMenuView.swift; sourceTree = "<group>"; };
@@ -254,6 +260,24 @@
 			path = scene_techniques;
 			sourceTree = "<group>";
 		};
+		EEBD6C032D464E3800F2C1E0 /* EditVirtualObjectController */ = {
+			isa = PBXGroup;
+			children = (
+				EEBD6C042D464E4E00F2C1E0 /* Cells */,
+				EEBD6C052D464E5A00F2C1E0 /* EditVirtualObjectView.swift */,
+				EEBD6C072D464E6300F2C1E0 /* EditVirtualObjectController.swift */,
+			);
+			path = EditVirtualObjectController;
+			sourceTree = "<group>";
+		};
+		EEBD6C042D464E4E00F2C1E0 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				EEBD6C092D464E7600F2C1E0 /* EditVirtualObjectCollectionItemCell.swift */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
 		EEC039992CCCE0F4003E0589 /* ModelsMenu */ = {
 			isa = PBXGroup;
 			children = (
@@ -297,6 +321,7 @@
 				EE41E5A22CEAA2DA00614560 /* CreateRoom */,
 				EE41E5982CEA26B500614560 /* RoomSelection */,
 				EEC039992CCCE0F4003E0589 /* ModelsMenu */,
+				EEBD6C032D464E3800F2C1E0 /* EditVirtualObjectController */,
 				EEC5E9EC2CCAC7800040237B /* Main */,
 				EEC5E9E62CCAC6D80040237B /* BaseView.swift */,
 				EEC5E9E82CCAC6F00040237B /* BaseController.swift */,
@@ -465,16 +490,19 @@
 				EE0404722D2942FF00B9DA2F /* AddModelTip.swift in Sources */,
 				EE04047B2D2C165F00B9DA2F /* Test.swift in Sources */,
 				EE41E5972CEA251400614560 /* RoomManager.swift in Sources */,
+				EEBD6C0A2D464E8300F2C1E0 /* EditVirtualObjectCollectionItemCell.swift in Sources */,
 				EE41E5A62CEAA2FC00614560 /* CreateRoomController.swift in Sources */,
 				EEE1D4182CDC1E0E00BC2CF8 /* SnapshotAnchor.swift in Sources */,
 				EEC039982CCC3DE6003E0589 /* VirtualObject.swift in Sources */,
 				EE04047D2D2C207300B9DA2F /* ShutterButton.swift in Sources */,
 				EEEEA0752CF11AB5004E1F92 /* ModelsMenuController.swift in Sources */,
+				EEBD6C082D464E6C00F2C1E0 /* EditVirtualObjectController.swift in Sources */,
 				EE1FE5F32CCAC2FF00D30110 /* SceneDelegate.swift in Sources */,
 				EEEEA0772CF11B6E004E1F92 /* ModelsMenuCollectionCell.swift in Sources */,
 				EE8F9D702CD4104C00CB0C2B /* RenderOutlineShaders.metal in Sources */,
 				EE41E5A42CEAA2F700614560 /* CreateRoomView.swift in Sources */,
 				EE4549B52CED68C9002A6D4F /* RoomType.swift in Sources */,
+				EEBD6C062D464E5F00F2C1E0 /* EditVirtualObjectView.swift in Sources */,
 				EEC5E9E72CCAC6D80040237B /* BaseView.swift in Sources */,
 				EEC5E9F32CCACF1D0040237B /* Plane.swift in Sources */,
 			);

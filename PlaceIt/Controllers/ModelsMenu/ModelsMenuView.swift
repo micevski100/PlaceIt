@@ -29,7 +29,6 @@ class ModelsMenuView: BaseView {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.backgroundColor = .clear
         containerView.contentView.addSubview(collectionView)
-       
     }
     
     override func setupConstraints() {

@@ -56,7 +56,7 @@ class ARView: ARSCNView {
     // MARK: - Helper Methods
     
     func virtualObject(at point: CGPoint) -> VirtualObject? {
-        let hitTestOptions: [SCNHitTestOption: Any] = [.boundingBoxOnly: true]
+        let hitTestOptions: [SCNHitTestOption: Any] = [SCNHitTestOption.searchMode : 1] //  [.boundingBoxOnly: true]
         let hitTestResults = hitTest(point, options: hitTestOptions)
         
         return hitTestResults.lazy.compactMap { result in
@@ -71,7 +71,7 @@ class ARView: ARSCNView {
         }
         
         // Create a new anchor with the object's current transform and add it to the session
-//        let newAnchor = ARAnchor(name: object.id.uuidString, transform: object.simdWorldTransform)
+        // let newAnchor = ARAnchor(name: object.id.uuidString, transform: object.simdWorldTransform)
         let newAnchor = ARAnchor(transform: object.simdWorldTransform)
         object.anchor = newAnchor
         session.add(anchor: newAnchor)

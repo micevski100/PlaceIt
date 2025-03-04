@@ -38,12 +38,17 @@ class VirtualObjectLoader {
     
     // MARK: - Remove Object
     
-    func removeObject(_ object: VirtualObject) {
+    func removeObject(_ object: VirtualObject, _ withAnimation: Bool = true) {
         guard let objectIndex = loadedObjects.firstIndex(of: object) else { return }
-        object.animateScaleDown()
         
-        // Delay object removal until the animation is completed.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        if (withAnimation) {
+            object.animateScaleDown()
+            
+            // Delay object removal until the animation is completed.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                object.removeFromParentNode()
+            }
+        } else {
             object.removeFromParentNode()
         }
         
@@ -57,5 +62,19 @@ class VirtualObjectLoader {
     
     func setLoadedObjects(_ objects: [VirtualObject]) {
         loadedObjects = objects
+    }
+    
+    // MARK: - Get Object Textures
+    func getTextures(for object: VirtualObject) -> [URL] {
+        let parentDirectory = object.referenceURL.deletingLastPathComponent()
+        let fileEnumerator = FileManager().enumerator(at: parentDirectory, includingPropertiesForKeys: [])!
+        
+        return fileEnumerator.compactMap { element in
+            let url = element as! URL
+
+            guard url.pathExtension == "scn" else { return nil }
+
+            return url
+        }
     }
 }

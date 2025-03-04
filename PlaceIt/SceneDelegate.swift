@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.backgroundColor = UIColor.init(hex: 0xF8F9FC)
         window?.rootViewController = RoomSelectionController.factoryController()
 //        window?.rootViewController = MainController.factoryController(.init(name: "asad", type: .bathRoom)) // For testing purposes.
-//        window?.rootViewController = UINavigationController(rootViewController: Test())
+//        window?.rootViewController = Test()
         window?.makeKeyAndVisible()
     }
 
